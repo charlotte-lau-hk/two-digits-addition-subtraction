@@ -13,22 +13,23 @@ A two-digit addition & subtraction practice game for Hong Kong primary school st
 
 - 先輸入名字，然後開始遊戲。 · Enter a name, then start.
 - 每題四個選項，選出正確答案。 · Each question has four choices; pick the right answer.
+- 每題有 **3 秒**限時（頂部的進度條會倒數）；時間到會當作答錯。 · Each question has a **3-second** limit (the top bar counts down); running out of time counts as a wrong answer.
 - 答對得 **10 分**，連續答對有額外獎分。 · **10 points** per correct answer, with a bonus for streaks.
 - 你有 **3 條命**（❤️），答錯 3 次遊戲結束。 · You have **3 lives** (❤️); the game ends after 3 wrong answers.
-- 每題作答後會顯示對／錯 2 秒，然後自動下一題。 · Correct/wrong is shown for 2 seconds, then the next question loads.
+- 每題作答後會顯示對／錯 2 秒（有倒數動畫），然後自動下一題。 · Correct/wrong is shown for 2 seconds (with a countdown animation), then the next question loads.
 - 也可以用鍵盤 **1–4** 作答。 · You can also answer with keys **1–4**.
 
 ### 題目 · Questions
 - 只有兩位數（10–99）的加法與減法，兩個數字。 · Two-digit (10–99) addition and subtraction, two numbers only.
-- 加法總和不超過 99；減法不會出現負數。 · Sums never exceed 99; subtraction never goes negative.
+- 加法可以出現大於 100 的結果（兩個數字都是 10–99）；減法不會出現負數。 · Addition may produce results over 100 (both numbers are 10–99); subtraction never goes negative.
+- 題目由程式即時隨機產生，每次遊戲都不同。 · Questions are generated randomly in real time, so every game is different.
 - 難度會逐漸提升（後段題目一定要進位／退位）。 · Difficulty ramps up (later questions always need carrying / borrowing).
 
 ### 遊戲結束 · Finishing
 - 顯示一張證書：學生名字、完成時間（香港時間）、用時、分數、最長連續答對。 · A certificate shows the name, timestamp (Hong Kong time), time used, score, and best streak.
 - **分享到 Google Classroom** — 手機／平板會直接開啟系統分享，選 Google Classroom 即可提交圖片作功課。桌面電腦會先下載證書圖片並開啟 Classroom 視窗，請自行附上剛下載的圖片。 · **Share to Google Classroom** — on phones/tablets the native share sheet opens (pick Classroom to submit the image as homework); on desktop the image downloads first and a Classroom window opens for you to attach it.
-- **下載證書圖片** · **Download Certificate Image**
-- **再玩一次**（不需重新輸入名字）· **Try Again** (no need to re-enter the name)
-- **換名字** · **Change Name**
+- **下載證書圖片**（檔名為隨機亂碼）· **Download Certificate Image** (saved with a random hash filename)
+- **我想再玩一次**（不需重新輸入名字）· **I want to try again** (no need to re-enter the name)
 
 ---
 
@@ -51,6 +52,18 @@ Open `index.html` and change this line near the top of the `<script>` to your re
 const GAME_URL = "https://charlotte-lau-hk.github.io/two-digits-addition-subtraction/";
 ```
 （此連結已預先填好，如 repo 名稱不同才需修改。 · Already filled in; only change it if your repo name differs.）
+
+### 可調校的設定 · Adjustable settings
+
+同一段 `<script>` 頂部有幾個常數，老師可按需要修改（例如覺得 3 秒太快）：
+
+A few constants at the top of the same `<script>` can be changed to suit your class (e.g. if 3 seconds feels too fast):
+
+```js
+const QUESTION_MS = 3000;  // 每題限時（毫秒）· time allowed per question (ms)
+const FEEDBACK_MS = 2000;  // 顯示對／錯的時間（毫秒）· how long the result is shown (ms)
+const POINTS      = 10;    // 每答對一題的分數 · points per correct answer
+```
 
 ---
 
