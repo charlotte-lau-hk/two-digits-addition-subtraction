@@ -138,16 +138,35 @@ input[type=text]:focus{outline:none;border-color:var(--c4);background:#fff}
 .score.bump .value{animation:bump .4s}
 @keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.35);color:#fde047}100%{transform:scale(1)}}
 
+/* Reserved slot so the pill appearing never shifts the card below it. */
+.streak-slot{
+  min-height:44px;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:6px;
+}
 .streak{
   text-align:center;color:#fff;font-weight:900;
   font-size:clamp(13px,3.4vw,17px);
-  background:rgba(249,115,22,.9);
-  border-radius:999px;padding:5px 16px;
-  margin:0 auto 12px;width:max-content;
+  background:rgba(249,115,22,.95);
+  border-radius:999px;padding:6px 18px;
+  width:max-content;max-width:100%;
   box-shadow:0 4px 14px rgba(0,0,0,.25);
-  animation:pop .3s;
+  opacity:0;transform:scale(.7);
+  transition:opacity .25s ease,transform .25s ease;
 }
-.streak[hidden]{display:none}
+.streak.show{opacity:1;transform:scale(1)}
+
+/* Per-question 3-second timer bar */
+.timer-track{
+  height:14px;background:#eef2ff;border-radius:999px;
+  overflow:hidden;margin-bottom:clamp(8px,2vw,14px);
+}
+.timer-bar{height:100%;width:100%;background:#22c55e;border-radius:999px}
+@keyframes timerShrink{
+  0%{width:100%;background:#22c55e}
+  60%{background:#f59e0b}
+  100%{width:0;background:#dc2626}
+}
 
 /* ---------- Question ---------- */
 .qmeta{text-align:center;color:var(--muted);font-weight:800;font-size:clamp(12px,3.2vw,15px);letter-spacing:1px}
@@ -213,10 +232,29 @@ input[type=text]:focus{outline:none;border-color:var(--c4);background:#fff}
 .fb-plus{margin-top:10px;font-size:clamp(16px,4.2vw,21px);font-weight:900;color:var(--c1)}
 .fb-plus[hidden]{display:none}
 
+/* Countdown ring shown on the result before the next question */
+.fb-countdown{position:relative;width:56px;height:56px;margin:20px auto 0}
+.fb-ring{width:56px;height:56px;transform:rotate(-90deg)}
+.fb-ring .track{fill:none;stroke:#e5e7eb;stroke-width:5}
+.fb-ring .progress{
+  fill:none;stroke:#94a3b8;stroke-width:5;stroke-linecap:round;
+  stroke-dasharray:131.95;stroke-dashoffset:0;
+}
+.feedback.right .fb-ring .progress{stroke:#16a34a}
+.feedback.wrong .fb-ring .progress{stroke:#dc2626}
+.feedback.show .fb-ring .progress{animation:deplete var(--fb-ms,2000ms) linear forwards}
+@keyframes deplete{to{stroke-dashoffset:131.95}}
+.fb-count{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-weight:900;font-size:24px;color:var(--ink);
+}
+
 /* ---------- Certificate ---------- */
 .cert-wrap{background:#fff;border-radius:var(--radius);padding:clamp(12px,3vw,20px);box-shadow:0 18px 50px rgba(15,23,42,.35)}
 #certCanvas{display:block;width:100%;height:auto;border-radius:14px}
-.cert-actions{margin-top:16px}
+.cert-actions{display:flex;flex-direction:column;gap:12px;margin-top:16px}
+.btn-row{display:flex;gap:12px}
+.btn-row .btn{flex:1;margin:0}
 .hint{
   margin-top:14px;background:#fffbeb;border:2px solid #fde68a;border-radius:16px;
   padding:12px 14px;font-size:clamp(13px,3.3vw,16px);font-weight:700;color:#78350f;
@@ -304,9 +342,10 @@ input[type=text]:focus{outline:none;border-color:var(--c4);background:#fff}
     </div>
   </div>
 
-  <div class="streak" id="streakBadge" hidden></div>
+  <div class="streak-slot"><div class="streak" id="streakBadge"></div></div>
 
   <div class="card">
+    <div class="timer-track"><div class="timer-bar" id="timerBar"></div></div>
     <div class="qmeta" id="qMeta">第 1 題 · QUESTION 1</div>
     <div class="question" id="questionText">— + — = ?</div>
     <div class="options" id="options">
@@ -330,21 +369,19 @@ input[type=text]:focus{outline:none;border-color:var(--c4);background:#fff}
             aria-label="學習證書 Certificate of Achievement"></canvas>
 
     <div class="cert-actions">
-      <button id="shareBtn" class="btn btn-classroom">
-        <span class="zh">分享到 Google Classroom</span>
-        <span class="en">Share to Google Classroom</span>
-      </button>
-      <button id="downloadBtn" class="btn btn-ghost">
-        <span class="zh">下載證書圖片</span>
-        <span class="en">Download Certificate Image</span>
-      </button>
+      <div class="btn-row">
+        <button id="shareBtn" class="btn btn-classroom">
+          <span class="zh">分享到 Google Classroom</span>
+          <span class="en">Share to Google Classroom</span>
+        </button>
+        <button id="downloadBtn" class="btn btn-ghost">
+          <span class="zh">下載證書圖片</span>
+          <span class="en">Download Certificate Image</span>
+        </button>
+      </div>
       <button id="againBtn" class="btn btn-again">
-        <span class="zh">再玩一次</span>
-        <span class="en">Try Again</span>
-      </button>
-      <button id="changeNameBtn" class="btn btn-ghost">
-        <span class="zh">換名字</span>
-        <span class="en">Change Name</span>
+        <span class="zh">我想再玩一次</span>
+        <span class="en">I want to try again</span>
       </button>
     </div>
 
@@ -362,6 +399,13 @@ input[type=text]:focus{outline:none;border-color:var(--c4);background:#fff}
     <div class="fb-title" id="fbTitle"></div>
     <div class="fb-detail" id="fbDetail" hidden></div>
     <div class="fb-plus" id="fbPlus" hidden></div>
+    <div class="fb-countdown" aria-hidden="true">
+      <svg class="fb-ring" viewBox="0 0 56 56">
+        <circle class="track" cx="28" cy="28" r="21"></circle>
+        <circle class="progress" cx="28" cy="28" r="21"></circle>
+      </svg>
+      <span class="fb-count" id="fbCount">2</span>
+    </div>
   </div>
 </div>
 
@@ -374,7 +418,8 @@ input[type=text]:focus{outline:none;border-color:var(--c4);background:#fff}
    ========================================================= */
 const GAME_URL = "https://charlotte-lau-hk.github.io/two-digits-addition-subtraction/";
 
-const FEEDBACK_MS   = 2000;
+const QUESTION_MS   = 3000;  // time allowed to answer each question (running out = a wrong answer)
+const FEEDBACK_MS   = 2000;  // how long the correct/wrong result stays before the next question
 const POINTS        = 10;
 const STREAK_MIN    = 3;    // streak bonus starts at this many in a row
 const STREAK_STEP   = 5;    // extra points per streak level above STREAK_MIN-1
@@ -512,8 +557,18 @@ const state = {
   startTime: 0,
   elapsedMs: 0,
   current: null,
-  locked: false
+  locked: false,
+  qTimer: null,
+  fbTimer: null,
+  fbInterval: null
 };
+
+function clearTimers(){
+  clearTimeout(state.qTimer);
+  clearTimeout(state.fbTimer);
+  clearInterval(state.fbInterval);
+  state.qTimer = state.fbTimer = state.fbInterval = null;
+}
 
 function showScreen(id){
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
@@ -522,6 +577,7 @@ function showScreen(id){
 }
 
 function startGame(){
+  clearTimers();
   state.hearts = 3;
   state.score = 0;
   state.streak = 0;
@@ -553,18 +609,31 @@ function nextQuestion(){
   });
 
   state.locked = false;
+  startQuestionTimer();
+}
+
+function startQuestionTimer(){
+  const bar = $("timerBar");
+  bar.style.animation = "none";
+  void bar.offsetWidth;                       // restart the shrink animation
+  bar.style.animation = `timerShrink ${QUESTION_MS}ms linear forwards`;
+  state.qTimer = setTimeout(() => answer(-1), QUESTION_MS);  // -1 = time ran out
 }
 
 function answer(i){
   if (state.locked || !state.current) return;
   state.locked = true;
+  clearTimeout(state.qTimer);
+  state.qTimer = null;
+  $("timerBar").style.animation = "none";
 
   const q = state.current;
-  const isRight = i === q.correctIndex;
+  const timedOut = i < 0;
+  const isRight = !timedOut && i === q.correctIndex;
   const buttons = document.querySelectorAll(".opt");
   buttons.forEach(b => { b.disabled = true; });
   buttons[q.correctIndex].classList.add("reveal-good");
-  if (!isRight) buttons[i].classList.add("reveal-bad");
+  if (!isRight && !timedOut) buttons[i].classList.add("reveal-bad");
 
   let gained = 0;
   if (isRight){
@@ -581,9 +650,9 @@ function answer(i){
   }
   renderStreak();
 
-  showFeedback(isRight, q, gained);
+  showFeedback(isRight, q, gained, timedOut);
 
-  setTimeout(() => {
+  state.fbTimer = setTimeout(() => {
     hideFeedback();
     if (state.hearts <= 0){
       endGame();
@@ -633,29 +702,30 @@ function renderStreak(){
   const badge = $("streakBadge");
   if (state.streak >= STREAK_MIN){
     badge.textContent = `🔥 連續答對 ${state.streak} 題 · ${state.streak} IN A ROW`;
-    badge.hidden = false;
+    badge.classList.add("show");
   } else {
-    badge.hidden = true;
+    badge.classList.remove("show");
   }
 }
 
 /* ---------- Feedback overlay ---------- */
-function showFeedback(isRight, q, gained){
+function showFeedback(isRight, q, gained, timedOut){
   const fb = $("feedback");
   fb.classList.remove("right", "wrong");
   fb.classList.add(isRight ? "right" : "wrong", "show");
   $("fbIcon").textContent = isRight ? "✓" : "✗";
-  $("fbTitle").innerHTML = isRight
-    ? '<span class="zh">答對了！</span><span class="en">Correct!</span>'
-    : '<span class="zh">答錯了</span><span class="en">Not quite</span>';
+
+  $("fbTitle").innerHTML = timedOut
+    ? '<span class="zh">時間到！</span><span class="en">Time\'s up!</span>'
+    : isRight
+      ? '<span class="zh">答對了！</span><span class="en">Correct!</span>'
+      : '<span class="zh">答錯了</span><span class="en">Not quite</span>';
 
   const detail = $("fbDetail");
   if (isRight){
     detail.hidden = true;
   } else {
-    detail.innerHTML =
-      '<span class="zh">正確答案：' + q.answer + '</span>' +
-      '<span class="en">Correct answer: ' + q.answer + '</span>';
+    detail.textContent = "正確答案 Correct answer: " + q.answer;
     detail.hidden = false;
   }
 
@@ -667,10 +737,29 @@ function showFeedback(isRight, q, gained){
   } else {
     plus.hidden = true;
   }
+
+  startFeedbackCountdown();
+}
+
+function startFeedbackCountdown(){
+  const el = $("fbCount");
+  let n = Math.ceil(FEEDBACK_MS / 1000);
+  el.textContent = n;
+  clearInterval(state.fbInterval);
+  state.fbInterval = setInterval(() => {
+    n -= 1;
+    el.textContent = n > 0 ? n : 0;
+    if (n <= 0){
+      clearInterval(state.fbInterval);
+      state.fbInterval = null;
+    }
+  }, 1000);
 }
 
 function hideFeedback(){
   $("feedback").classList.remove("show");
+  clearInterval(state.fbInterval);
+  state.fbInterval = null;
 }
 
 /* =========================================================
@@ -756,41 +845,49 @@ function drawCertificate(){
 
   // Title
   c.fillStyle = "#4c1d95";
-  c.font = `900 56px ${FONT_STACK}`;
-  c.fillText("學習證書", cx, 232);
+  c.font = `900 46px ${FONT_STACK}`;
+  c.fillText("學習證書", cx, 208);
   c.fillStyle = "#6d28d9";
-  c.font = `700 27px ${FONT_STACK}`;
-  c.fillText("Certificate of Achievement", cx, 268);
+  c.font = `700 22px ${FONT_STACK}`;
+  c.fillText("Certificate of Achievement", cx, 240);
+
+  // Game name — the centrepiece, large and central.
+  c.fillStyle = "#7c3aed";
+  c.font = `900 54px ${FONT_STACK}`;
+  c.fillText("兩位數加減遊戲", cx, 312);
+  c.fillStyle = "#0ea5e9";
+  c.font = `800 28px ${FONT_STACK}`;
+  c.fillText("Two-Digit Add & Subtract", cx, 348);
 
   c.strokeStyle = "#e9d5ff";
   c.lineWidth = 3;
   c.beginPath();
-  c.moveTo(cx - 200, 296);
-  c.lineTo(cx + 200, 296);
+  c.moveTo(cx - 220, 378);
+  c.lineTo(cx + 220, 378);
   c.stroke();
 
   // Recipient
   c.fillStyle = "#475569";
-  c.font = `700 24px ${FONT_STACK}`;
-  c.fillText("此證書頒發給", cx, 344);
-  c.font = `600 18px ${FONT_STACK}`;
-  c.fillText("This certificate is proudly awarded to", cx, 370);
+  c.font = `700 23px ${FONT_STACK}`;
+  c.fillText("此證書頒發給", cx, 418);
+  c.font = `600 17px ${FONT_STACK}`;
+  c.fillText("This certificate is proudly awarded to", cx, 444);
 
   // Shrink the name if it is long enough to reach the border.
-  let nameSize = 62;
+  let nameSize = 56;
   c.fillStyle = "#1e1b4b";
   do {
     c.font = `900 ${nameSize}px ${FONT_STACK}`;
     if (c.measureText(state.name).width <= 900) break;
     nameSize -= 4;
   } while (nameSize > 26);
-  c.fillText(state.name, cx, 442);
+  c.fillText(state.name, cx, 508);
 
   c.strokeStyle = "#c4b5fd";
   c.lineWidth = 4;
   c.beginPath();
-  c.moveTo(cx - 260, 466);
-  c.lineTo(cx + 260, 466);
+  c.moveTo(cx - 260, 534);
+  c.lineTo(cx + 260, 534);
   c.stroke();
 
   // Stats
@@ -800,9 +897,9 @@ function drawCertificate(){
     { zh: "用時",     en: "Time Used",   value: formatDuration(state.elapsedMs) },
     { zh: "最長連續", en: "Best Streak", value: String(state.bestStreak) }
   ];
-  const boxW = 240, gap = 24, boxH = 132;
+  const boxW = 240, gap = 24, boxH = 126;
   const startX = (CERT_W - (boxW * 4 + gap * 3)) / 2;
-  const boxY = 516;
+  const boxY = 568;
 
   stats.forEach((s, i) => {
     const x = startX + i * (boxW + gap);
@@ -816,39 +913,38 @@ function drawCertificate(){
     const mid = x + boxW / 2;
     c.fillStyle = "#6d28d9";
     c.font = `800 21px ${FONT_STACK}`;
-    c.fillText(s.zh, mid, boxY + 34);
+    c.fillText(s.zh, mid, boxY + 32);
     c.fillStyle = "#7c3aed";
     c.font = `600 15px ${FONT_STACK}`;
-    c.fillText(s.en, mid, boxY + 56);
+    c.fillText(s.en, mid, boxY + 54);
     c.fillStyle = "#1e1b4b";
-    c.font = `900 44px ${FONT_STACK}`;
-    c.fillText(s.value, mid, boxY + 108);
+    c.font = `900 42px ${FONT_STACK}`;
+    c.fillText(s.value, mid, boxY + 104);
   });
 
-  // Footer
+  // Footer — timestamp only
   const now = new Date();
   c.fillStyle = "#475569";
   c.font = `700 20px ${FONT_STACK}`;
-  c.fillText("完成時間：" + hkTime(now, "zh-HK"), cx, 704);
+  c.fillText("完成時間：" + hkTime(now, "zh-HK"), cx, 748);
   c.font = `600 17px ${FONT_STACK}`;
   c.fillStyle = "#64748b";
-  c.fillText("Completed: " + hkTime(now, "en-HK") + " (Hong Kong Time)", cx, 730);
-
-  c.fillStyle = "#94a3b8";
-  c.font = `700 18px ${FONT_STACK}`;
-  c.fillText("兩位數加減遊戲 · Two-Digit Add & Subtract", cx, 786);
+  c.fillText("Completed: " + hkTime(now, "en-HK") + " (Hong Kong Time)", cx, 774);
 }
 
 /* =========================================================
    Sharing
    ========================================================= */
 function certFilename(){
-  const d = new Date();
-  const stamp = d.getFullYear() +
-    String(d.getMonth() + 1).padStart(2, "0") +
-    String(d.getDate()).padStart(2, "0");
-  const safe = state.name.replace(/[\\/:*?"<>|]/g, "").trim() || "student";
-  return `證書_${safe}_${stamp}.png`;
+  // Random hash-style name so the saved file looks anonymous.
+  const bytes = new Uint8Array(16);
+  if (window.crypto && crypto.getRandomValues){
+    crypto.getRandomValues(bytes);
+  } else {
+    for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256);
+  }
+  const hex = Array.from(bytes, b => b.toString(16).padStart(2, "0")).join("");
+  return hex + ".png";
 }
 
 function certBlob(){
@@ -935,20 +1031,15 @@ document.addEventListener("keydown", e => {
 
 $("againBtn").addEventListener("click", startGame);
 
-$("changeNameBtn").addEventListener("click", () => {
-  nameInput.value = state.name;
-  startBtn.disabled = nameInput.value.trim().length === 0;
-  showScreen("screen-welcome");
-  nameInput.focus();
-  nameInput.select();
-});
-
 $("shareBtn").addEventListener("click", shareCertificate);
 
 $("downloadBtn").addEventListener("click", async () => {
   const blob = await certBlob();
   if (blob) downloadBlob(blob, certFilename());
 });
+
+// Keep the result countdown ring in sync with the feedback duration.
+$("feedback").style.setProperty("--fb-ms", FEEDBACK_MS + "ms");
 
 // Pre-fill the name for a student who has played on this device before.
 const saved = store("tdas.name");
