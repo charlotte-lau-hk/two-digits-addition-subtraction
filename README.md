@@ -19,11 +19,24 @@ A two-digit addition & subtraction practice game for Hong Kong primary school st
 - 每題作答後會顯示對／錯 2 秒（有倒數動畫），然後自動下一題。 · Correct/wrong is shown for 2 seconds (with a countdown animation), then the next question loads.
 - 也可以用鍵盤 **1–4** 作答。 · You can also answer with keys **1–4**.
 
+### 分級 · Levels
+難度會隨分數升級，共 4 級。升級時會有提示，HUD 也會顯示目前等級與距離下一級的進度條。
+
+Difficulty levels up with your score — 4 levels in all. A banner celebrates each level-up, and the HUD shows the current level with a progress bar toward the next one.
+
+| 等級 Level | 內容 Focus | 加減 Operations | 結果 Sums |
+|---|---|---|---|
+| **1** 加法 Addition | 只有加法 · addition only | 只有加法 · addition | < 100 |
+| **2** 加減混合 Add & Subtract | 加減混合 · mixed | 約 55% 加 / 45% 減 | < 100 |
+| **3** 減法挑戰 Subtraction | 減法為主 · more subtraction | 約 40% 加 / 60% 減 | < 100 |
+| **4** 破百挑戰 Over 100 | 加入大於 100 的加法 · adds over-100 sums | 混合 · mixed | 可 ≥ 100，比例隨分數增加 · ≥ 100 allowed, more with score |
+
+升級的分數門檻預設為 **0 / 80 / 200 / 360**（可在設定中調整）。 · The level-up score thresholds default to **0 / 80 / 200 / 360** (adjustable in settings).
+
 ### 題目 · Questions
 - 只有兩位數（10–99）的加法與減法，兩個數字。 · Two-digit (10–99) addition and subtraction, two numbers only.
-- 加法初期結果都在 100 以內；當分數達到 **100** 分後，才會出現大於 100 的結果（兩個數字都是 10–99）。減法不會出現負數。 · Addition sums stay under 100 at first; results over 100 only appear once the score reaches **100** (both numbers are 10–99). Subtraction never goes negative.
+- 減法不會出現負數。 · Subtraction never goes negative.
 - 題目由程式即時隨機產生，每次遊戲都不同。 · Questions are generated randomly in real time, so every game is different.
-- 難度會逐漸提升（後段題目一定要進位／退位）。 · Difficulty ramps up (later questions always need carrying / borrowing).
 
 ### 遊戲結束 · Finishing
 - 顯示一張證書：學生名字、完成時間（香港時間）、用時、分數、最長連續答對。 · A certificate shows the name, timestamp (Hong Kong time), time used, score, and best streak.
@@ -87,7 +100,7 @@ A few constants at the top of the same `<script>` can be changed to suit your cl
 const QUESTION_MS   = 3000; // 每題限時（毫秒）· time allowed per question (ms)
 const FEEDBACK_MS   = 2000; // 顯示對／錯的時間（毫秒）· how long the result is shown (ms)
 const POINTS        = 10;   // 每答對一題的分數 · points per correct answer
-const OVER_100_SCORE = 100; // 分數達此值後才會出現大於 100 的加法 · sums over 100 appear only after the score reaches this
+const LEVEL_MIN_SCORE = [0, 80, 200, 360]; // 升到第 1/2/3/4 級所需的分數 · score needed to reach level 1/2/3/4
 ```
 
 ---

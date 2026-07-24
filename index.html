@@ -157,6 +157,32 @@ input[type=text]:focus{outline:none;border-color:var(--c4);background:#fff}
 }
 .streak.show{opacity:1;transform:scale(1)}
 
+/* ---------- Level chip + progress ---------- */
+.level-chip{
+  background:rgba(255,255,255,.16);
+  border:1.5px solid rgba(255,255,255,.35);
+  border-radius:16px;
+  padding:8px 14px;
+  margin-bottom:10px;
+  color:#fff;
+  backdrop-filter:blur(2px);
+}
+.level-top{
+  display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+  margin-bottom:7px;
+}
+.level-label{font-weight:900;font-size:clamp(12px,3.2vw,15px);letter-spacing:.5px;white-space:nowrap}
+.level-name{font-weight:800;font-size:clamp(11px,3vw,14px);opacity:.9;text-align:right}
+.level-track{
+  height:9px;background:rgba(0,0,0,.22);border-radius:999px;overflow:hidden;
+}
+.level-fill{
+  height:100%;width:0;border-radius:999px;
+  background:linear-gradient(90deg,#fbbf24,#f97316);
+  transition:width .5s cubic-bezier(.22,1,.36,1);
+}
+.level-chip.maxed .level-fill{background:linear-gradient(90deg,#34d399,#10b981)}
+
 /* Per-question 3-second timer bar */
 .timer-track{
   height:14px;background:#eef2ff;border-radius:999px;
@@ -232,6 +258,17 @@ input[type=text]:focus{outline:none;border-color:var(--c4);background:#fff}
 .fb-detail[hidden]{display:none}
 .fb-plus{margin-top:10px;font-size:clamp(16px,4.2vw,21px);font-weight:900;color:var(--c1)}
 .fb-plus[hidden]{display:none}
+.fb-level{
+  margin-top:14px;display:flex;flex-direction:column;gap:2px;
+  background:linear-gradient(90deg,#fbbf24,#f97316);
+  color:#fff;border-radius:14px;padding:10px 16px;
+  box-shadow:0 6px 18px rgba(249,115,22,.4);
+  animation:levelPop .4s cubic-bezier(.22,1,.36,1);
+}
+.fb-level .zh{font-size:clamp(18px,4.8vw,24px);font-weight:900}
+.fb-level .en{font-size:clamp(12px,3.2vw,15px);font-weight:800;opacity:.92;letter-spacing:.5px}
+.fb-level[hidden]{display:none}
+@keyframes levelPop{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
 
 /* Countdown ring shown on the result before the next question */
 .fb-countdown{position:relative;width:56px;height:56px;margin:20px auto 0}
@@ -343,6 +380,14 @@ input[type=text]:focus{outline:none;border-color:var(--c4);background:#fff}
     </div>
   </div>
 
+  <div class="level-chip" id="levelChip">
+    <div class="level-top">
+      <span class="level-label">等級 <span id="levelNum">1</span> · LEVEL</span>
+      <span class="level-name" id="levelName">加法 · Addition</span>
+    </div>
+    <div class="level-track"><div class="level-fill" id="levelFill"></div></div>
+  </div>
+
   <div class="streak-slot"><div class="streak" id="streakBadge"></div></div>
 
   <div class="card">
@@ -400,6 +445,7 @@ input[type=text]:focus{outline:none;border-color:var(--c4);background:#fff}
     <div class="fb-title" id="fbTitle"></div>
     <div class="fb-detail" id="fbDetail" hidden></div>
     <div class="fb-plus" id="fbPlus" hidden></div>
+    <div class="fb-level" id="fbLevel" hidden></div>
     <div class="fb-countdown" aria-hidden="true">
       <svg class="fb-ring" viewBox="0 0 56 56">
         <circle class="track" cx="28" cy="28" r="21"></circle>
@@ -425,7 +471,16 @@ const POINTS        = 10;
 const STREAK_MIN    = 3;    // streak bonus starts at this many in a row
 const STREAK_STEP   = 5;    // extra points per streak level above STREAK_MIN-1
 const STREAK_MAX    = 25;   // cap on the bonus
-const OVER_100_SCORE = 100;  // sums over 100 only start appearing once the score reaches this
+
+// Level system. A player's level is decided by their score; each level changes
+// the mix of operations and difficulty. Tune LEVEL_MIN_SCORE to pace it.
+const LEVEL_MIN_SCORE = [0, 80, 200, 360];   // minimum score to be at level 1, 2, 3, 4
+const LEVELS = [
+  { zh: "加法",     en: "Addition",        addProb: 1.00, carryProb: 0.35, borrowProb: 0.00 },
+  { zh: "加減混合", en: "Add & Subtract",  addProb: 0.55, carryProb: 0.55, borrowProb: 0.55 },
+  { zh: "減法挑戰", en: "Subtraction",     addProb: 0.40, carryProb: 0.65, borrowProb: 0.70 },
+  { zh: "破百挑戰", en: "Over 100",        addProb: 0.55, carryProb: 0.70, borrowProb: 0.70 }
+];
 
 /* ---------- tiny helpers ---------- */
 const $ = id => document.getElementById(id);
@@ -449,21 +504,36 @@ function store(key, value){
 
 /* =========================================================
    Question generation
-   Operands are always 10–99. Addition sums stay under 100 until the
-   score reaches OVER_100_SCORE, after which sums may exceed 100.
+   Operands are always 10–99. The player's level (from score) sets the
+   operation mix and difficulty; over-100 sums only appear at level 4.
    Subtraction never produces a negative result.
    ========================================================= */
 
-// level 0 = no carrying / borrowing, 1 = free mix, 2 = must carry / borrow
-function levelFor(index){
-  if (index < 5)  return 0;
-  if (index < 12) return Math.random() < 0.5 ? 0 : 2;
-  return 2;
+// Current level (1-4) for a given score.
+function levelForScore(score){
+  let lvl = 1;
+  for (let i = 0; i < LEVEL_MIN_SCORE.length; i++){
+    if (score >= LEVEL_MIN_SCORE[i]) lvl = i + 1;
+  }
+  return lvl;
 }
 
-function makeAddition(level, allowOver100){
-  // "carry" here means the units column carries; sums may exceed 100.
-  const carry = level === 2 || (level === 1 && Math.random() < 0.5);
+// Progress (0-1) toward the next level; 1 when already at the top level.
+function levelProgress(score){
+  const lvl = levelForScore(score);
+  if (lvl >= LEVEL_MIN_SCORE.length) return 1;
+  const here = LEVEL_MIN_SCORE[lvl - 1];
+  const next = LEVEL_MIN_SCORE[lvl];
+  return Math.max(0, Math.min(1, (score - here) / (next - here)));
+}
+
+// Level 4 only: the chance an addition is allowed to exceed 100 rises with score.
+function over100Prob(score){
+  return Math.min(0.6, 0.2 + (score - LEVEL_MIN_SCORE[3]) / 1000);
+}
+
+function makeAddition(carry, allowOver100){
+  // "carry" means the units column carries; over-100 sums need allowOver100.
   let ua, ub;
   if (carry){
     ua = randInt(1, 9);
@@ -485,8 +555,7 @@ function makeAddition(level, allowOver100){
   return { a: ta * 10 + ua, b: tb * 10 + ub, op: "+" };
 }
 
-function makeSubtraction(level){
-  const borrow = level === 2 || (level === 1 && Math.random() < 0.5);
+function makeSubtraction(borrow){
   let ua, ub, ta, tb;
   if (borrow){
     ua = randInt(0, 8);
@@ -502,12 +571,17 @@ function makeSubtraction(level){
   return { a: ta * 10 + ua, b: tb * 10 + ub, op: "-" };
 }
 
-function makeQuestion(index){
-  const level = levelFor(index);
-  // Alternate loosely so the game never runs one operation for too long.
-  const wantAdd = index % 2 === 0 ? Math.random() < 0.65 : Math.random() < 0.35;
-  const allowOver100 = state.score >= OVER_100_SCORE;
-  const q = wantAdd ? makeAddition(level, allowOver100) : makeSubtraction(level);
+function makeQuestion(){
+  const cfg = LEVELS[levelForScore(state.score) - 1];
+  const wantAdd = Math.random() < cfg.addProb;
+  let q;
+  if (wantAdd){
+    const carry = Math.random() < cfg.carryProb;
+    const over100 = state.level >= 4 && Math.random() < over100Prob(state.score);
+    q = makeAddition(carry, over100);
+  } else {
+    q = makeSubtraction(Math.random() < cfg.borrowProb);
+  }
   q.answer = q.op === "+" ? q.a + q.b : q.a - q.b;
   q.options = makeOptions(q);
   q.correctIndex = q.options.indexOf(q.answer);
@@ -560,6 +634,7 @@ const state = {
   name: "",
   hearts: 3,
   score: 0,
+  level: 1,
   streak: 0,
   bestStreak: 0,
   correct: 0,
@@ -591,6 +666,7 @@ function startGame(){
   clearTimers();
   state.hearts = 3;
   state.score = 0;
+  state.level = 1;
   state.streak = 0;
   state.bestStreak = 0;
   state.correct = 0;
@@ -601,13 +677,14 @@ function startGame(){
   $("hudName").textContent = state.name;
   renderHearts();
   renderScore(false);
+  renderLevel();
   renderStreak();
   showScreen("screen-game");
   nextQuestion();
 }
 
 function nextQuestion(){
-  state.current = makeQuestion(state.index);
+  state.current = makeQuestion();
   const q = state.current;
 
   $("qMeta").textContent = `第 ${state.index + 1} 題 · QUESTION ${state.index + 1}`;
@@ -647,6 +724,7 @@ function answer(i){
   if (!isRight && !timedOut) buttons[i].classList.add("reveal-bad");
 
   let gained = 0;
+  let leveledUp = false;
   if (isRight){
     state.correct++;
     state.streak++;
@@ -654,6 +732,10 @@ function answer(i){
     gained = POINTS + streakBonus(state.streak);
     state.score += gained;
     renderScore(true);
+    const newLevel = levelForScore(state.score);
+    leveledUp = newLevel > state.level;
+    state.level = newLevel;
+    renderLevel();
   } else {
     state.streak = 0;
     state.hearts--;
@@ -661,7 +743,7 @@ function answer(i){
   }
   renderStreak();
 
-  showFeedback(isRight, q, gained, timedOut);
+  showFeedback(isRight, q, gained, timedOut, leveledUp);
 
   state.fbTimer = setTimeout(() => {
     hideFeedback();
@@ -710,6 +792,15 @@ function renderScore(bump){
   box.classList.add("bump");
 }
 
+function renderLevel(){
+  const cfg = LEVELS[state.level - 1];
+  $("levelNum").textContent = state.level;
+  $("levelName").textContent = cfg.zh + " · " + cfg.en;
+  const atMax = state.level >= LEVEL_MIN_SCORE.length;
+  $("levelFill").style.width = (levelProgress(state.score) * 100) + "%";
+  $("levelChip").classList.toggle("maxed", atMax);
+}
+
 function renderStreak(){
   const badge = $("streakBadge");
   if (state.streak >= STREAK_MIN){
@@ -721,11 +812,21 @@ function renderStreak(){
 }
 
 /* ---------- Feedback overlay ---------- */
-function showFeedback(isRight, q, gained, timedOut){
+function showFeedback(isRight, q, gained, timedOut, leveledUp){
   const fb = $("feedback");
   fb.classList.remove("right", "wrong");
   fb.classList.add(isRight ? "right" : "wrong", "show");
   $("fbIcon").textContent = isRight ? "✓" : "✗";
+
+  const lvl = $("fbLevel");
+  if (leveledUp){
+    const cfg = LEVELS[state.level - 1];
+    lvl.innerHTML = `<span class="zh">🎉 升級！等級 ${state.level}</span>` +
+                    `<span class="en">LEVEL ${state.level} · ${cfg.en}</span>`;
+    lvl.hidden = false;
+  } else {
+    lvl.hidden = true;
+  }
 
   $("fbTitle").innerHTML = timedOut
     ? '<span class="zh">時間到！</span><span class="en">Time\'s up!</span>'
