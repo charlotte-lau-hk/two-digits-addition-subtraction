@@ -183,7 +183,7 @@ input[type=text]:focus{outline:none;border-color:var(--c4);background:#fff}
 }
 .level-chip.maxed .level-fill{background:linear-gradient(90deg,#34d399,#10b981)}
 
-/* Per-question 3-second timer bar */
+/* Per-question countdown timer bar (duration set in JS, shrinks with score) */
 .timer-track{
   height:14px;background:#eef2ff;border-radius:999px;
   overflow:hidden;margin-bottom:clamp(8px,2vw,14px);
@@ -465,7 +465,22 @@ input[type=text]:focus{outline:none;border-color:var(--c4);background:#fff}
    ========================================================= */
 const GAME_URL = "https://charlotte-lau-hk.github.io/two-digits-addition-subtraction/";
 
-const QUESTION_MS   = 8000;  // time allowed to answer each question (running out = a wrong answer)
+const QUESTION_MS   = 8000;  // starting time allowed to answer each question (running out = a wrong answer)
+
+// Score-based speed-up: once the score passes SPEEDUP_MIN_SCORE, the per-question
+// timer shrinks by SPEEDUP_STEP_MS for every SPEEDUP_STEP_SCORE points earned,
+// bottoming out at SPEEDUP_FLOOR_MS. With these values it goes 8s (score 500) down
+// to 3s (score 1000) in 0.5s steps, then holds at 3s.
+const SPEEDUP_MIN_SCORE   = 500;
+const SPEEDUP_STEP_SCORE  = 50;
+const SPEEDUP_STEP_MS     = 500;
+const SPEEDUP_FLOOR_MS    = 3000;
+
+// The time allowed for the current question, given the player's score.
+function questionMs(score){
+  const steps = Math.floor(Math.max(0, score - SPEEDUP_MIN_SCORE) / SPEEDUP_STEP_SCORE);
+  return Math.max(SPEEDUP_FLOOR_MS, QUESTION_MS - steps * SPEEDUP_STEP_MS);
+}
 const FEEDBACK_MS   = 2000;  // how long the correct/wrong result stays before the next question
 const POINTS        = 10;
 const STREAK_MIN    = 3;    // streak bonus starts at this many in a row
@@ -473,7 +488,7 @@ const STREAK_STEP   = 5;    // extra points per streak level above STREAK_MIN-1
 const STREAK_MAX    = 25;   // cap on the bonus
 
 // Fast bonus — extra points for answering a question quickly (correct answers only).
-// The tiers are fractions of QUESTION_MS, so they scale if you change the timer.
+// The tiers are fractions of the current question timer, so they scale as it shrinks.
 const FAST_BONUS_MAX  = 5;    // very fast answer
 const FAST_BONUS_MID  = 2;    // fairly fast answer
 const FAST_FULL_FRAC  = 0.30; // answer within this fraction of the time → FAST_BONUS_MAX
@@ -648,6 +663,7 @@ const state = {
   index: 0,
   startTime: 0,
   qStart: 0,
+  qMs: QUESTION_MS,
   elapsedMs: 0,
   current: null,
   certNo: "",
@@ -709,17 +725,19 @@ function nextQuestion(){
 }
 
 function startQuestionTimer(){
+  const ms = questionMs(state.score);
+  state.qMs = ms;                             // keep timeout, animation and fast bonus on the same clock
   const bar = $("timerBar");
   bar.style.animation = "none";
   void bar.offsetWidth;                       // restart the shrink animation
-  bar.style.animation = `timerShrink ${QUESTION_MS}ms linear forwards`;
+  bar.style.animation = `timerShrink ${ms}ms linear forwards`;
   state.qStart = Date.now();
-  state.qTimer = setTimeout(() => answer(-1), QUESTION_MS);  // -1 = time ran out
+  state.qTimer = setTimeout(() => answer(-1), ms);  // -1 = time ran out
 }
 
 // Extra points for a quick correct answer, based on how much time was left.
 function fastBonus(responseMs){
-  const frac = responseMs / QUESTION_MS;
+  const frac = responseMs / (state.qMs || QUESTION_MS);
   if (frac <= FAST_FULL_FRAC) return FAST_BONUS_MAX;
   if (frac <= FAST_MID_FRAC)  return FAST_BONUS_MID;
   return 0;
