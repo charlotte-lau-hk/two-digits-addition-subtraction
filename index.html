@@ -459,20 +459,18 @@ function levelFor(index){
 }
 
 function makeAddition(level){
+  // "carry" here means the units column carries; sums may exceed 100.
   const carry = level === 2 || (level === 1 && Math.random() < 0.5);
-  let ua, ub, ta, tb;
+  let ua, ub;
   if (carry){
-    // units must overflow, so the tens must leave room for the carried 1
     ua = randInt(1, 9);
-    ub = randInt(10 - ua, 9);
-    ta = randInt(1, 7);
-    tb = randInt(1, 8 - ta);
+    ub = randInt(10 - ua, 9);   // units overflow
   } else {
     ua = randInt(0, 9);
-    ub = randInt(0, 9 - ua);
-    ta = randInt(1, 8);
-    tb = randInt(1, 9 - ta);
+    ub = randInt(0, 9 - ua);    // units stay under 10
   }
+  const ta = randInt(1, 9);
+  const tb = randInt(1, 9);
   return { a: ta * 10 + ua, b: tb * 10 + ub, op: "+" };
 }
 
@@ -509,7 +507,7 @@ function makeOptions(q){
   const ans = q.answer;
   const pool = [];
   const add = v => {
-    if (Number.isInteger(v) && v >= 0 && v <= 150 && v !== ans && !pool.includes(v)) pool.push(v);
+    if (Number.isInteger(v) && v >= 0 && v <= 210 && v !== ans && !pool.includes(v)) pool.push(v);
   };
 
   add(ans + 1);            // counted one too many
