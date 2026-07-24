@@ -836,19 +836,19 @@ function drawCertificate(){
   const cx = CERT_W / 2;
   c.fillStyle = "#fbbf24";
   c.beginPath();
-  c.arc(cx, 128, 46, 0, Math.PI * 2);
+  c.arc(cx, 112, 40, 0, Math.PI * 2);
   c.fill();
   c.fillStyle = "#ffffff";
-  star(c, cx, 128, 5, 27, 12);
+  star(c, cx, 112, 5, 24, 11);
   c.fill();
 
   // Title
   c.fillStyle = "#4c1d95";
   c.font = `900 46px ${FONT_STACK}`;
-  c.fillText("學習證書", cx, 208);
+  c.fillText("學習證書", cx, 220);
   c.fillStyle = "#6d28d9";
   c.font = `700 22px ${FONT_STACK}`;
-  c.fillText("Certificate of Achievement", cx, 240);
+  c.fillText("Certificate of Achievement", cx, 248);
 
   // Game name — the centrepiece, large and central.
   c.fillStyle = "#7c3aed";
