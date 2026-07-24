@@ -425,6 +425,7 @@ const POINTS        = 10;
 const STREAK_MIN    = 3;    // streak bonus starts at this many in a row
 const STREAK_STEP   = 5;    // extra points per streak level above STREAK_MIN-1
 const STREAK_MAX    = 25;   // cap on the bonus
+const OVER_100_SCORE = 100;  // sums over 100 only start appearing once the score reaches this
 
 /* ---------- tiny helpers ---------- */
 const $ = id => document.getElementById(id);
@@ -448,8 +449,9 @@ function store(key, value){
 
 /* =========================================================
    Question generation
-   Operands are always 10–99. Addition sums are capped at 99
-   and subtraction never produces a negative result.
+   Operands are always 10–99. Addition sums stay under 100 until the
+   score reaches OVER_100_SCORE, after which sums may exceed 100.
+   Subtraction never produces a negative result.
    ========================================================= */
 
 // level 0 = no carrying / borrowing, 1 = free mix, 2 = must carry / borrow
@@ -459,7 +461,7 @@ function levelFor(index){
   return 2;
 }
 
-function makeAddition(level){
+function makeAddition(level, allowOver100){
   // "carry" here means the units column carries; sums may exceed 100.
   const carry = level === 2 || (level === 1 && Math.random() < 0.5);
   let ua, ub;
@@ -470,8 +472,16 @@ function makeAddition(level){
     ua = randInt(0, 9);
     ub = randInt(0, 9 - ua);    // units stay under 10
   }
-  const ta = randInt(1, 9);
-  const tb = randInt(1, 9);
+  let ta, tb;
+  if (allowOver100){
+    ta = randInt(1, 9);
+    tb = randInt(1, 9);
+  } else {
+    // Keep the sum under 100: tens (plus any units carry) must total at most 9.
+    const room = 9 - (carry ? 1 : 0);
+    ta = randInt(1, room - 1);
+    tb = randInt(1, room - ta);
+  }
   return { a: ta * 10 + ua, b: tb * 10 + ub, op: "+" };
 }
 
@@ -496,7 +506,8 @@ function makeQuestion(index){
   const level = levelFor(index);
   // Alternate loosely so the game never runs one operation for too long.
   const wantAdd = index % 2 === 0 ? Math.random() < 0.65 : Math.random() < 0.35;
-  const q = wantAdd ? makeAddition(level) : makeSubtraction(level);
+  const allowOver100 = state.score >= OVER_100_SCORE;
+  const q = wantAdd ? makeAddition(level, allowOver100) : makeSubtraction(level);
   q.answer = q.op === "+" ? q.a + q.b : q.a - q.b;
   q.options = makeOptions(q);
   q.correctIndex = q.options.indexOf(q.answer);

@@ -21,7 +21,7 @@ A two-digit addition & subtraction practice game for Hong Kong primary school st
 
 ### 題目 · Questions
 - 只有兩位數（10–99）的加法與減法，兩個數字。 · Two-digit (10–99) addition and subtraction, two numbers only.
-- 加法可以出現大於 100 的結果（兩個數字都是 10–99）；減法不會出現負數。 · Addition may produce results over 100 (both numbers are 10–99); subtraction never goes negative.
+- 加法初期結果都在 100 以內；當分數達到 **100** 分後，才會出現大於 100 的結果（兩個數字都是 10–99）。減法不會出現負數。 · Addition sums stay under 100 at first; results over 100 only appear once the score reaches **100** (both numbers are 10–99). Subtraction never goes negative.
 - 題目由程式即時隨機產生，每次遊戲都不同。 · Questions are generated randomly in real time, so every game is different.
 - 難度會逐漸提升（後段題目一定要進位／退位）。 · Difficulty ramps up (later questions always need carrying / borrowing).
 
@@ -84,9 +84,10 @@ const GAME_URL = "https://charlotte-lau-hk.github.io/two-digits-addition-subtrac
 A few constants at the top of the same `<script>` can be changed to suit your class (e.g. if 3 seconds feels too fast):
 
 ```js
-const QUESTION_MS = 3000;  // 每題限時（毫秒）· time allowed per question (ms)
-const FEEDBACK_MS = 2000;  // 顯示對／錯的時間（毫秒）· how long the result is shown (ms)
-const POINTS      = 10;    // 每答對一題的分數 · points per correct answer
+const QUESTION_MS   = 3000; // 每題限時（毫秒）· time allowed per question (ms)
+const FEEDBACK_MS   = 2000; // 顯示對／錯的時間（毫秒）· how long the result is shown (ms)
+const POINTS        = 10;   // 每答對一題的分數 · points per correct answer
+const OVER_100_SCORE = 100; // 分數達此值後才會出現大於 100 的加法 · sums over 100 appear only after the score reaches this
 ```
 
 ---
