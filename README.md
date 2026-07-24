@@ -13,8 +13,8 @@ A two-digit addition & subtraction practice game for Hong Kong primary school st
 
 - 先輸入名字，然後開始遊戲。 · Enter a name, then start.
 - 每題四個選項，選出正確答案。 · Each question has four choices; pick the right answer.
-- 每題有 **3 秒**限時（頂部的進度條會倒數）；時間到會當作答錯。 · Each question has a **3-second** limit (the top bar counts down); running out of time counts as a wrong answer.
-- 答對得 **10 分**，連續答對有額外獎分。 · **10 points** per correct answer, with a bonus for streaks.
+- 每題有 **8 秒**限時（頂部的進度條會倒數）；時間到會當作答錯。 · Each question has an **8-second** limit (the top bar counts down); running out of time counts as a wrong answer.
+- 答對得 **10 分**，連續答對有額外獎分，答得快亦有 **⚡ 快手獎分**（越快分數越高）。 · **10 points** per correct answer, plus a streak bonus and a **⚡ fast bonus** for answering quickly (faster = more points).
 - 你有 **3 條命**（❤️），答錯 3 次遊戲結束。 · You have **3 lives** (❤️); the game ends after 3 wrong answers.
 - 每題作答後會顯示對／錯 2 秒（有倒數動畫），然後自動下一題。 · Correct/wrong is shown for 2 seconds (with a countdown animation), then the next question loads.
 - 也可以用鍵盤 **1–4** 作答。 · You can also answer with keys **1–4**.
@@ -97,10 +97,14 @@ const GAME_URL = "https://charlotte-lau-hk.github.io/two-digits-addition-subtrac
 A few constants at the top of the same `<script>` can be changed to suit your class (e.g. if 3 seconds feels too fast):
 
 ```js
-const QUESTION_MS   = 3000; // 每題限時（毫秒）· time allowed per question (ms)
-const FEEDBACK_MS   = 2000; // 顯示對／錯的時間（毫秒）· how long the result is shown (ms)
-const POINTS        = 10;   // 每答對一題的分數 · points per correct answer
+const QUESTION_MS   = 8000;  // 每題限時（毫秒）· time allowed per question (ms)
+const FEEDBACK_MS   = 2000;  // 顯示對／錯的時間（毫秒）· how long the result is shown (ms)
+const POINTS        = 10;    // 每答對一題的分數 · points per correct answer
 const LEVEL_MIN_SCORE = [0, 80, 200, 360]; // 升到第 1/2/3/4 級所需的分數 · score needed to reach level 1/2/3/4
+const FAST_BONUS_MAX = 5;    // 很快作答的獎分 · bonus for a very fast answer
+const FAST_BONUS_MID = 2;    // 較快作答的獎分 · bonus for a fairly fast answer
+const FAST_FULL_FRAC = 0.30; // 在此時間比例內答對得滿額快手獎分 · full fast bonus if answered within this fraction of the time
+const FAST_MID_FRAC  = 0.60; // 在此時間比例內答對得部分快手獎分 · partial fast bonus within this fraction
 ```
 
 ---

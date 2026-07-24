@@ -465,12 +465,19 @@ input[type=text]:focus{outline:none;border-color:var(--c4);background:#fff}
    ========================================================= */
 const GAME_URL = "https://charlotte-lau-hk.github.io/two-digits-addition-subtraction/";
 
-const QUESTION_MS   = 3000;  // time allowed to answer each question (running out = a wrong answer)
+const QUESTION_MS   = 8000;  // time allowed to answer each question (running out = a wrong answer)
 const FEEDBACK_MS   = 2000;  // how long the correct/wrong result stays before the next question
 const POINTS        = 10;
 const STREAK_MIN    = 3;    // streak bonus starts at this many in a row
 const STREAK_STEP   = 5;    // extra points per streak level above STREAK_MIN-1
 const STREAK_MAX    = 25;   // cap on the bonus
+
+// Fast bonus — extra points for answering a question quickly (correct answers only).
+// The tiers are fractions of QUESTION_MS, so they scale if you change the timer.
+const FAST_BONUS_MAX  = 5;    // very fast answer
+const FAST_BONUS_MID  = 2;    // fairly fast answer
+const FAST_FULL_FRAC  = 0.30; // answer within this fraction of the time → FAST_BONUS_MAX
+const FAST_MID_FRAC   = 0.60; // answer within this fraction of the time → FAST_BONUS_MID
 
 // Level system. A player's level is decided by their score; each level changes
 // the mix of operations and difficulty. Tune LEVEL_MIN_SCORE to pace it.
@@ -640,6 +647,7 @@ const state = {
   correct: 0,
   index: 0,
   startTime: 0,
+  qStart: 0,
   elapsedMs: 0,
   current: null,
   certNo: "",
@@ -705,7 +713,16 @@ function startQuestionTimer(){
   bar.style.animation = "none";
   void bar.offsetWidth;                       // restart the shrink animation
   bar.style.animation = `timerShrink ${QUESTION_MS}ms linear forwards`;
+  state.qStart = Date.now();
   state.qTimer = setTimeout(() => answer(-1), QUESTION_MS);  // -1 = time ran out
+}
+
+// Extra points for a quick correct answer, based on how much time was left.
+function fastBonus(responseMs){
+  const frac = responseMs / QUESTION_MS;
+  if (frac <= FAST_FULL_FRAC) return FAST_BONUS_MAX;
+  if (frac <= FAST_MID_FRAC)  return FAST_BONUS_MID;
+  return 0;
 }
 
 function answer(i){
@@ -724,12 +741,15 @@ function answer(i){
   if (!isRight && !timedOut) buttons[i].classList.add("reveal-bad");
 
   let gained = 0;
+  let streakB = 0, fastB = 0;
   let leveledUp = false;
   if (isRight){
     state.correct++;
     state.streak++;
     state.bestStreak = Math.max(state.bestStreak, state.streak);
-    gained = POINTS + streakBonus(state.streak);
+    streakB = streakBonus(state.streak);
+    fastB = fastBonus(Date.now() - state.qStart);
+    gained = POINTS + streakB + fastB;
     state.score += gained;
     renderScore(true);
     const newLevel = levelForScore(state.score);
@@ -743,7 +763,7 @@ function answer(i){
   }
   renderStreak();
 
-  showFeedback(isRight, q, gained, timedOut, leveledUp);
+  showFeedback(isRight, q, { gained, streakB, fastB }, timedOut, leveledUp);
 
   state.fbTimer = setTimeout(() => {
     hideFeedback();
@@ -812,7 +832,7 @@ function renderStreak(){
 }
 
 /* ---------- Feedback overlay ---------- */
-function showFeedback(isRight, q, gained, timedOut, leveledUp){
+function showFeedback(isRight, q, gain, timedOut, leveledUp){
   const fb = $("feedback");
   fb.classList.remove("right", "wrong");
   fb.classList.add(isRight ? "right" : "wrong", "show");
@@ -843,9 +863,13 @@ function showFeedback(isRight, q, gained, timedOut, leveledUp){
   }
 
   const plus = $("fbPlus");
-  if (isRight && gained > 0){
-    const bonus = gained - POINTS;
-    plus.textContent = bonus > 0 ? `+${gained} 分 (連續獎分 +${bonus})` : `+${gained} 分`;
+  if (isRight && gain.gained > 0){
+    const parts = [];
+    if (gain.streakB > 0) parts.push(`連續 +${gain.streakB}`);
+    if (gain.fastB > 0)   parts.push(`⚡ 快手 +${gain.fastB}`);
+    plus.textContent = parts.length
+      ? `+${gain.gained} 分 (${parts.join(" · ")})`
+      : `+${gain.gained} 分`;
     plus.hidden = false;
   } else {
     plus.hidden = true;
