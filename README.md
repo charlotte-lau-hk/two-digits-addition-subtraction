@@ -28,8 +28,32 @@ A two-digit addition & subtraction practice game for Hong Kong primary school st
 ### 遊戲結束 · Finishing
 - 顯示一張證書：學生名字、完成時間（香港時間）、用時、分數、最長連續答對。 · A certificate shows the name, timestamp (Hong Kong time), time used, score, and best streak.
 - **分享到 Google Classroom** — 手機／平板會直接開啟系統分享，選 Google Classroom 即可提交圖片作功課。桌面電腦會先下載證書圖片並開啟 Classroom 視窗，請自行附上剛下載的圖片。 · **Share to Google Classroom** — on phones/tablets the native share sheet opens (pick Classroom to submit the image as homework); on desktop the image downloads first and a Classroom window opens for you to attach it.
-- **下載證書圖片**（檔名為隨機亂碼）· **Download Certificate Image** (saved with a random hash filename)
+- **下載證書圖片**（檔名與證書上的編號一致）· **Download Certificate Image** (the filename matches the certificate number printed on it)
 - **我想再玩一次**（不需重新輸入名字）· **I want to try again** (no need to re-enter the name)
+
+---
+
+## 證書編號 · Certificate number
+
+每張證書右上角都有一個編號（例如 `編號 No. 3F9A-2C71-8B04`），下載的圖片檔名亦與此編號一致。
+
+Each certificate carries a number in the top-right corner (e.g. `No. 3F9A-2C71-8B04`), and the downloaded image's filename matches it.
+
+編號的計算方法（完全在瀏覽器內）：對字串 **`yyyyMMddHHmmss,名字,分數`**（完成時的香港時間、學生名字、分數）做 **SHA-256** 雜湊，取前 12 個十六進位字元。
+
+How it is computed (entirely in the browser): a **SHA-256** hash of the string **`yyyyMMddHHmmss,name,score`** (the Hong Kong completion time, the student's name, and the score), taking the first 12 hexadecimal characters.
+
+### 好處 · Pros
+- **同一張證書、同一個編號**：印在圖上的編號與檔名一致，老師可一眼核對兩者是否相符（不符即代表圖片被改過）。 · **One certificate, one number**: the printed number and the filename match, so a teacher can spot at a glance if they disagree (a mismatch means the image was edited).
+- **提高作弊成本**：學生不能只把隨便一張圖改名交功課，也難以憑空亂作一個看似合理的編號。 · **Raises the cost of cheating**: a student can't just rename any image, nor easily invent a plausible-looking number by hand.
+- **保留少量可追溯性**：編號綁定了完成時間、名字與分數。 · **Some traceability**: the number is bound to the completion time, name, and score.
+
+### 限制 · Cons / limits
+- **並非防偽**：本遊戲純前端，計算方法與程式碼都會傳送到瀏覽器。懂技術的人可用開發者工具改分數、重新計算編號，或直接用繪圖軟件偽造整張證書。 · **Not tamper-proof**: the game is client-only; the algorithm and code are all shipped to the browser. A technical user can change the score in DevTools and recompute the number, or forge the whole certificate in an image editor.
+- **可重現、非隨機**：相同的秒數＋名字＋分數會得出相同編號，因此編號只證明「有人用這條公式算出這些數值」，而**不能**證明「學生真的取得該分數」。 · **Reproducible, not random**: the same second + name + score yields the same number, so it only proves "someone ran this formula on these values" — it does **not** prove "the student really earned that score".
+- **沒有集中記錄／統計**：不會保存成績，也無法做班級的聚合統計。 · **No central records / statistics**: scores are not stored, and class-wide aggregate statistics are not possible.
+
+> 想要真正可核實的成績與聚合統計，必須有伺服器端（例如以伺服器保管的密鑰做 HMAC 簽章，或由伺服器記錄成績）。本版本刻意維持純前端、零部署成本、零技術負擔，把證書編號定位為**提高作弊成本的阻嚇措施**，而非防偽保證。 · For genuinely verifiable scores and aggregate statistics you need a server side (e.g. HMAC-signing with a server-held secret, or recording results on a server). This version deliberately stays client-only — zero deployment cost, zero technical overhead — treating the certificate number as a **deterrent that raises the cost of cheating**, not a guarantee against forgery.
 
 ---
 
