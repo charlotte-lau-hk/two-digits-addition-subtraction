@@ -1,0 +1,961 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>兩位數加減遊戲 | Two-Digit Add &amp; Subtract</title>
+<meta name="description" content="小學生兩位數加減法練習遊戲 | Two-digit addition and subtraction practice game for primary school students">
+<style>
+:root{
+  --bg1:#6d28d9;
+  --bg2:#2563eb;
+  --ink:#1e1b4b;
+  --muted:#64748b;
+  --good:#16a34a;
+  --bad:#dc2626;
+  --gold:#f59e0b;
+  --c1:#f97316;
+  --c2:#0ea5e9;
+  --c3:#10b981;
+  --c4:#a855f7;
+  --radius:26px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+
+body{
+  font-family:"PingFang TC","Microsoft JhengHei","Noto Sans TC","Hiragino Sans TC",
+              system-ui,-apple-system,"Segoe UI",sans-serif;
+  color:var(--ink);
+  background:linear-gradient(160deg,var(--bg1) 0%,var(--bg2) 100%);
+  background-attachment:fixed;
+  min-height:100vh;
+  min-height:100dvh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+}
+
+/* Every piece of text is Chinese on top, English underneath. */
+.zh{display:block;line-height:1.25}
+.en{display:block;font-size:.6em;font-weight:600;opacity:.78;line-height:1.25}
+
+.screen{display:none;width:100%;max-width:760px}
+.screen.active{display:block;animation:pop .35s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes pop{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+
+.card{
+  background:#fff;
+  border-radius:var(--radius);
+  padding:clamp(20px,4.5vw,38px);
+  box-shadow:0 18px 50px rgba(15,23,42,.35);
+}
+
+/* ---------- Welcome ---------- */
+.logo{font-size:clamp(48px,14vw,76px);text-align:center;line-height:1}
+h1{text-align:center;font-size:clamp(28px,7vw,44px);font-weight:900;margin:6px 0 4px;color:#4c1d95}
+.subtitle{text-align:center;font-size:clamp(15px,3.6vw,19px);color:var(--muted);font-weight:700;margin-bottom:clamp(16px,4vw,26px)}
+
+.rules{
+  background:#f5f3ff;
+  border:2px dashed #c4b5fd;
+  border-radius:18px;
+  padding:clamp(14px,3.5vw,20px);
+  margin-bottom:clamp(18px,4vw,26px);
+}
+.rule{display:flex;gap:12px;align-items:flex-start;font-size:clamp(14px,3.4vw,18px);font-weight:700}
+.rule+.rule{margin-top:12px}
+.rule .ico{font-size:1.5em;line-height:1.1;flex:none}
+
+label.field{display:block;font-size:clamp(16px,4vw,22px);font-weight:800;margin-bottom:10px}
+input[type=text]{
+  width:100%;
+  font:inherit;
+  font-size:clamp(22px,6vw,32px);
+  font-weight:800;
+  text-align:center;
+  padding:14px 16px;
+  border:4px solid #ddd6fe;
+  border-radius:18px;
+  background:#faf5ff;
+  color:var(--ink);
+}
+input[type=text]:focus{outline:none;border-color:var(--c4);background:#fff}
+
+.btn{
+  display:block;
+  width:100%;
+  font:inherit;
+  font-weight:900;
+  font-size:clamp(19px,5vw,26px);
+  color:#fff;
+  border:none;
+  border-radius:20px;
+  padding:clamp(14px,3.6vw,20px);
+  cursor:pointer;
+  box-shadow:0 6px 0 rgba(0,0,0,.22);
+  transition:transform .08s ease,box-shadow .08s ease,filter .15s ease;
+}
+.btn:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(0,0,0,.22)}
+.btn:disabled{filter:grayscale(.7);opacity:.55;cursor:not-allowed;transform:none}
+.btn-primary{background:linear-gradient(180deg,#22c55e,#15803d)}
+.btn-classroom{background:linear-gradient(180deg,#0ea5e9,#0369a1)}
+.btn-again{background:linear-gradient(180deg,#f97316,#c2410c)}
+.btn-ghost{background:transparent;color:#4c1d95;box-shadow:none;border:3px solid #ddd6fe;font-size:clamp(15px,3.8vw,19px)}
+.btn-ghost:active{transform:none;background:#f5f3ff}
+.btn+.btn{margin-top:12px}
+
+/* ---------- Game HUD ---------- */
+.hud{
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:center;
+  gap:10px;
+  color:#fff;
+  margin-bottom:14px;
+  text-shadow:0 2px 8px rgba(0,0,0,.3);
+}
+.hearts{justify-self:start;font-size:clamp(26px,7vw,38px);line-height:1;white-space:nowrap}
+.heart{transition:transform .3s ease,filter .3s ease,opacity .3s ease;display:inline-block}
+.heart.lost{filter:grayscale(1);opacity:.3;transform:scale(.8)}
+.heart.breaking{animation:shake .5s}
+@keyframes shake{
+  0%,100%{transform:translateX(0) scale(1)}
+  25%{transform:translateX(-6px) scale(1.25)}
+  75%{transform:translateX(6px) scale(1.25)}
+}
+.player{
+  justify-self:center;text-align:center;font-weight:900;
+  font-size:clamp(15px,4vw,22px);
+  max-width:42vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.player .en{font-size:.62em;font-weight:700;opacity:.85}
+.score{justify-self:end;text-align:right;font-weight:900;line-height:1.1}
+.score .label{display:block;font-size:clamp(10px,2.6vw,13px);opacity:.85;letter-spacing:.5px}
+.score .value{display:block;font-size:clamp(24px,6.5vw,34px);font-variant-numeric:tabular-nums}
+.score.bump .value{animation:bump .4s}
+@keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.35);color:#fde047}100%{transform:scale(1)}}
+
+.streak{
+  text-align:center;color:#fff;font-weight:900;
+  font-size:clamp(13px,3.4vw,17px);
+  background:rgba(249,115,22,.9);
+  border-radius:999px;padding:5px 16px;
+  margin:0 auto 12px;width:max-content;
+  box-shadow:0 4px 14px rgba(0,0,0,.25);
+  animation:pop .3s;
+}
+.streak[hidden]{display:none}
+
+/* ---------- Question ---------- */
+.qmeta{text-align:center;color:var(--muted);font-weight:800;font-size:clamp(12px,3.2vw,15px);letter-spacing:1px}
+.question{
+  text-align:center;
+  font-size:clamp(46px,14vw,86px);
+  font-weight:900;
+  letter-spacing:3px;
+  font-variant-numeric:tabular-nums;
+  margin:clamp(6px,2vw,14px) 0 clamp(4px,2vw,10px);
+  color:#312e81;
+}
+
+.options{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(10px,2.6vw,16px);margin-top:clamp(12px,3vw,20px)}
+.opt{
+  font:inherit;font-weight:900;
+  font-size:clamp(30px,8.5vw,48px);
+  font-variant-numeric:tabular-nums;
+  color:#fff;border:none;border-radius:20px;
+  padding:clamp(14px,4vw,24px) 8px;
+  min-height:82px;cursor:pointer;
+  box-shadow:0 7px 0 rgba(0,0,0,.2);
+  transition:transform .08s ease,box-shadow .08s ease;
+  position:relative;
+}
+.opt:active:not(:disabled){transform:translateY(4px);box-shadow:0 3px 0 rgba(0,0,0,.2)}
+.opt:disabled{cursor:default}
+.opt:nth-child(1){background:linear-gradient(180deg,#fb923c,#ea580c)}
+.opt:nth-child(2){background:linear-gradient(180deg,#38bdf8,#0284c7)}
+.opt:nth-child(3){background:linear-gradient(180deg,#34d399,#059669)}
+.opt:nth-child(4){background:linear-gradient(180deg,#c084fc,#7e22ce)}
+.opt .key{
+  position:absolute;top:6px;left:10px;
+  font-size:13px;font-weight:800;opacity:.6;
+}
+.opt.reveal-good{outline:6px solid #16a34a;outline-offset:-6px}
+.opt.reveal-bad{outline:6px solid #dc2626;outline-offset:-6px;filter:grayscale(.5)}
+
+/* ---------- Feedback overlay ---------- */
+.feedback{
+  position:fixed;inset:0;z-index:30;
+  display:none;align-items:center;justify-content:center;
+  background:rgba(15,23,42,.5);
+  padding:20px;
+}
+.feedback.show{display:flex;animation:pop .22s}
+.fb-box{
+  background:#fff;border-radius:30px;text-align:center;
+  padding:clamp(24px,6vw,44px) clamp(20px,6vw,48px);
+  min-width:min(88vw,420px);
+  box-shadow:0 22px 60px rgba(0,0,0,.4);
+  border-top:12px solid var(--good);
+}
+.feedback.wrong .fb-box{border-top-color:var(--bad)}
+.fb-icon{font-size:clamp(60px,17vw,100px);line-height:1;font-weight:900}
+.feedback.right .fb-icon{color:var(--good)}
+.feedback.wrong .fb-icon{color:var(--bad)}
+.fb-title{font-size:clamp(24px,6.5vw,36px);font-weight:900;margin-top:6px}
+.feedback.right .fb-title{color:var(--good)}
+.feedback.wrong .fb-title{color:var(--bad)}
+.fb-detail{margin-top:14px;font-size:clamp(17px,4.4vw,23px);font-weight:800;color:var(--ink)}
+.fb-detail[hidden]{display:none}
+.fb-plus{margin-top:10px;font-size:clamp(16px,4.2vw,21px);font-weight:900;color:var(--c1)}
+.fb-plus[hidden]{display:none}
+
+/* ---------- Certificate ---------- */
+.cert-wrap{background:#fff;border-radius:var(--radius);padding:clamp(12px,3vw,20px);box-shadow:0 18px 50px rgba(15,23,42,.35)}
+#certCanvas{display:block;width:100%;height:auto;border-radius:14px}
+.cert-actions{margin-top:16px}
+.hint{
+  margin-top:14px;background:#fffbeb;border:2px solid #fde68a;border-radius:16px;
+  padding:12px 14px;font-size:clamp(13px,3.3vw,16px);font-weight:700;color:#78350f;
+}
+.hint[hidden]{display:none}
+.hint .en{opacity:.85}
+
+.footnote{text-align:center;color:rgba(255,255,255,.85);font-size:13px;font-weight:700;margin-top:16px;line-height:1.5}
+
+@media (max-width:380px){
+  .options{gap:9px}
+  .opt{min-height:70px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ WELCOME ============ -->
+<section id="screen-welcome" class="screen active">
+  <div class="card">
+    <div class="logo">🧮</div>
+    <h1>
+      <span class="zh">兩位數加減遊戲</span>
+      <span class="en">Two-Digit Add &amp; Subtract</span>
+    </h1>
+    <p class="subtitle">
+      <span class="zh">小學數學練習</span>
+      <span class="en">Primary Maths Practice</span>
+    </p>
+
+    <div class="rules">
+      <div class="rule">
+        <span class="ico">❤️</span>
+        <span>
+          <span class="zh">你有 3 條命，答錯 3 次遊戲便結束。</span>
+          <span class="en">You have 3 lives. The game ends after 3 wrong answers.</span>
+        </span>
+      </div>
+      <div class="rule">
+        <span class="ico">⭐</span>
+        <span>
+          <span class="zh">每答對一題得 10 分，連續答對有額外獎分！</span>
+          <span class="en">10 points per correct answer, plus a bonus for streaks!</span>
+        </span>
+      </div>
+      <div class="rule">
+        <span class="ico">🏆</span>
+        <span>
+          <span class="zh">完成後可獲得證書，並交給老師。</span>
+          <span class="en">Earn a certificate at the end to hand in to your teacher.</span>
+        </span>
+      </div>
+    </div>
+
+    <label class="field" for="nameInput">
+      <span class="zh">請輸入你的名字</span>
+      <span class="en">Please enter your name</span>
+    </label>
+    <input id="nameInput" type="text" maxlength="20" autocomplete="name"
+           inputmode="text" placeholder="陳大文 / Tai Man">
+
+    <div style="height:18px"></div>
+    <button id="startBtn" class="btn btn-primary" disabled>
+      <span class="zh">開始遊戲</span>
+      <span class="en">Start Game</span>
+    </button>
+  </div>
+</section>
+
+<!-- ============ GAME ============ -->
+<section id="screen-game" class="screen">
+  <div class="hud">
+    <div class="hearts" id="hearts" aria-label="生命 Lives"></div>
+    <div class="player">
+      <span class="zh" id="hudName">—</span>
+      <span class="en">Player</span>
+    </div>
+    <div class="score" id="scoreBox">
+      <span class="label">分數 SCORE</span>
+      <span class="value" id="scoreValue">0</span>
+    </div>
+  </div>
+
+  <div class="streak" id="streakBadge" hidden></div>
+
+  <div class="card">
+    <div class="qmeta" id="qMeta">第 1 題 · QUESTION 1</div>
+    <div class="question" id="questionText">— + — = ?</div>
+    <div class="options" id="options">
+      <button class="opt" type="button" data-i="0"><span class="key">1</span><span class="val"></span></button>
+      <button class="opt" type="button" data-i="1"><span class="key">2</span><span class="val"></span></button>
+      <button class="opt" type="button" data-i="2"><span class="key">3</span><span class="val"></span></button>
+      <button class="opt" type="button" data-i="3"><span class="key">4</span><span class="val"></span></button>
+    </div>
+  </div>
+
+  <p class="footnote">
+    <span class="zh">用鍵盤 1–4 也可以作答</span>
+    <span class="en">You can also answer with keys 1–4</span>
+  </p>
+</section>
+
+<!-- ============ CERTIFICATE ============ -->
+<section id="screen-cert" class="screen">
+  <div class="cert-wrap">
+    <canvas id="certCanvas" role="img"
+            aria-label="學習證書 Certificate of Achievement"></canvas>
+
+    <div class="cert-actions">
+      <button id="shareBtn" class="btn btn-classroom">
+        <span class="zh">分享到 Google Classroom</span>
+        <span class="en">Share to Google Classroom</span>
+      </button>
+      <button id="downloadBtn" class="btn btn-ghost">
+        <span class="zh">下載證書圖片</span>
+        <span class="en">Download Certificate Image</span>
+      </button>
+      <button id="againBtn" class="btn btn-again">
+        <span class="zh">再玩一次</span>
+        <span class="en">Try Again</span>
+      </button>
+      <button id="changeNameBtn" class="btn btn-ghost">
+        <span class="zh">換名字</span>
+        <span class="en">Change Name</span>
+      </button>
+    </div>
+
+    <div class="hint" id="shareHint" hidden>
+      <span class="zh">證書圖片已下載。請在剛開啟的 Google Classroom 視窗中，按「新增附件 → 檔案」，選擇剛下載的圖片再提交。</span>
+      <span class="en">The certificate image has been downloaded. In the Google Classroom window that just opened, choose “Add attachment → File”, pick the downloaded image, then submit.</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FEEDBACK OVERLAY ============ -->
+<div class="feedback" id="feedback" role="status" aria-live="assertive">
+  <div class="fb-box">
+    <div class="fb-icon" id="fbIcon">✓</div>
+    <div class="fb-title" id="fbTitle"></div>
+    <div class="fb-detail" id="fbDetail" hidden></div>
+    <div class="fb-plus" id="fbPlus" hidden></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* =========================================================
+   CONFIG — edit this after you publish to GitHub Pages.
+   It is used for the Google Classroom share link.
+   ========================================================= */
+const GAME_URL = "https://charlotte-lau-hk.github.io/two-digits-addition-subtraction/";
+
+const FEEDBACK_MS   = 2000;
+const POINTS        = 10;
+const STREAK_MIN    = 3;    // streak bonus starts at this many in a row
+const STREAK_STEP   = 5;    // extra points per streak level above STREAK_MIN-1
+const STREAK_MAX    = 25;   // cap on the bonus
+
+/* ---------- tiny helpers ---------- */
+const $ = id => document.getElementById(id);
+const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+function shuffle(a){
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function store(key, value){
+  try {
+    if (value === undefined) return localStorage.getItem(key);
+    localStorage.setItem(key, value);
+  } catch (e) { /* private mode / blocked storage — not fatal */ }
+  return null;
+}
+
+/* =========================================================
+   Question generation
+   Operands are always 10–99. Addition sums are capped at 99
+   and subtraction never produces a negative result.
+   ========================================================= */
+
+// level 0 = no carrying / borrowing, 1 = free mix, 2 = must carry / borrow
+function levelFor(index){
+  if (index < 5)  return 0;
+  if (index < 12) return Math.random() < 0.5 ? 0 : 2;
+  return 2;
+}
+
+function makeAddition(level){
+  const carry = level === 2 || (level === 1 && Math.random() < 0.5);
+  let ua, ub, ta, tb;
+  if (carry){
+    // units must overflow, so the tens must leave room for the carried 1
+    ua = randInt(1, 9);
+    ub = randInt(10 - ua, 9);
+    ta = randInt(1, 7);
+    tb = randInt(1, 8 - ta);
+  } else {
+    ua = randInt(0, 9);
+    ub = randInt(0, 9 - ua);
+    ta = randInt(1, 8);
+    tb = randInt(1, 9 - ta);
+  }
+  return { a: ta * 10 + ua, b: tb * 10 + ub, op: "+" };
+}
+
+function makeSubtraction(level){
+  const borrow = level === 2 || (level === 1 && Math.random() < 0.5);
+  let ua, ub, ta, tb;
+  if (borrow){
+    ua = randInt(0, 8);
+    ub = randInt(ua + 1, 9);
+    ta = randInt(2, 9);
+    tb = randInt(1, ta - 1);
+  } else {
+    ua = randInt(0, 9);
+    ub = randInt(0, ua);
+    ta = randInt(1, 9);
+    tb = randInt(1, ta);
+  }
+  return { a: ta * 10 + ua, b: tb * 10 + ub, op: "-" };
+}
+
+function makeQuestion(index){
+  const level = levelFor(index);
+  // Alternate loosely so the game never runs one operation for too long.
+  const wantAdd = index % 2 === 0 ? Math.random() < 0.65 : Math.random() < 0.35;
+  const q = wantAdd ? makeAddition(level) : makeSubtraction(level);
+  q.answer = q.op === "+" ? q.a + q.b : q.a - q.b;
+  q.options = makeOptions(q);
+  q.correctIndex = q.options.indexOf(q.answer);
+  return q;
+}
+
+// Distractors model the mistakes children actually make, not random noise.
+function makeOptions(q){
+  const ans = q.answer;
+  const pool = [];
+  const add = v => {
+    if (Number.isInteger(v) && v >= 0 && v <= 150 && v !== ans && !pool.includes(v)) pool.push(v);
+  };
+
+  add(ans + 1);            // counted one too many
+  add(ans - 1);            // counted one too few
+  add(ans + 10);           // carried when it should not have
+  add(ans - 10);           // forgot to carry / borrow
+  add(swapDigits(ans));    // wrote the digits the wrong way round
+
+  if (q.op === "-"){
+    // classic column error: always take the smaller digit from the bigger one
+    add(Math.abs(q.a % 10 - q.b % 10) + Math.abs(Math.floor(q.a / 10) - Math.floor(q.b / 10)) * 10);
+    add(q.a + q.b);        // used the wrong operation
+  } else {
+    add(Math.abs(q.a - q.b));
+  }
+
+  shuffle(pool);
+  const opts = pool.slice(0, 3);
+  let guard = 0;
+  while (opts.length < 3 && guard++ < 60){
+    const v = ans + randInt(-15, 15);
+    if (v >= 0 && v !== ans && !opts.includes(v)) opts.push(v);
+  }
+  opts.push(ans);
+  return shuffle(opts);
+}
+
+function swapDigits(n){
+  if (n < 10) return n * 10;
+  if (n > 99) return n;
+  return (n % 10) * 10 + Math.floor(n / 10);
+}
+
+/* =========================================================
+   Game state
+   ========================================================= */
+const state = {
+  name: "",
+  hearts: 3,
+  score: 0,
+  streak: 0,
+  bestStreak: 0,
+  correct: 0,
+  index: 0,
+  startTime: 0,
+  elapsedMs: 0,
+  current: null,
+  locked: false
+};
+
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  $(id).classList.add("active");
+  window.scrollTo(0, 0);
+}
+
+function startGame(){
+  state.hearts = 3;
+  state.score = 0;
+  state.streak = 0;
+  state.bestStreak = 0;
+  state.correct = 0;
+  state.index = 0;
+  state.locked = false;
+  state.startTime = Date.now();
+
+  $("hudName").textContent = state.name;
+  renderHearts();
+  renderScore(false);
+  renderStreak();
+  showScreen("screen-game");
+  nextQuestion();
+}
+
+function nextQuestion(){
+  state.current = makeQuestion(state.index);
+  const q = state.current;
+
+  $("qMeta").textContent = `第 ${state.index + 1} 題 · QUESTION ${state.index + 1}`;
+  $("questionText").textContent = `${q.a} ${q.op === "+" ? "+" : "−"} ${q.b} = ?`;
+
+  document.querySelectorAll(".opt").forEach((btn, i) => {
+    btn.querySelector(".val").textContent = q.options[i];
+    btn.disabled = false;
+    btn.classList.remove("reveal-good", "reveal-bad");
+  });
+
+  state.locked = false;
+}
+
+function answer(i){
+  if (state.locked || !state.current) return;
+  state.locked = true;
+
+  const q = state.current;
+  const isRight = i === q.correctIndex;
+  const buttons = document.querySelectorAll(".opt");
+  buttons.forEach(b => { b.disabled = true; });
+  buttons[q.correctIndex].classList.add("reveal-good");
+  if (!isRight) buttons[i].classList.add("reveal-bad");
+
+  let gained = 0;
+  if (isRight){
+    state.correct++;
+    state.streak++;
+    state.bestStreak = Math.max(state.bestStreak, state.streak);
+    gained = POINTS + streakBonus(state.streak);
+    state.score += gained;
+    renderScore(true);
+  } else {
+    state.streak = 0;
+    state.hearts--;
+    renderHearts(true);
+  }
+  renderStreak();
+
+  showFeedback(isRight, q, gained);
+
+  setTimeout(() => {
+    hideFeedback();
+    if (state.hearts <= 0){
+      endGame();
+    } else {
+      state.index++;
+      nextQuestion();
+    }
+  }, FEEDBACK_MS);
+}
+
+function streakBonus(streak){
+  if (streak < STREAK_MIN) return 0;
+  return Math.min((streak - STREAK_MIN + 1) * STREAK_STEP, STREAK_MAX);
+}
+
+function endGame(){
+  state.elapsedMs = Date.now() - state.startTime;
+  $("shareHint").hidden = true;
+  drawCertificate();
+  showScreen("screen-cert");
+}
+
+/* ---------- HUD rendering ---------- */
+function renderHearts(justLost){
+  const el = $("hearts");
+  el.innerHTML = "";
+  for (let i = 0; i < 3; i++){
+    const span = document.createElement("span");
+    const lost = i >= state.hearts;
+    span.className = "heart" + (lost ? " lost" : "");
+    span.textContent = lost ? "🤍" : "❤️";
+    if (justLost && i === state.hearts) span.classList.add("breaking");
+    el.appendChild(span);
+  }
+}
+
+function renderScore(bump){
+  $("scoreValue").textContent = state.score;
+  if (!bump) return;
+  const box = $("scoreBox");
+  box.classList.remove("bump");
+  void box.offsetWidth; // restart the animation
+  box.classList.add("bump");
+}
+
+function renderStreak(){
+  const badge = $("streakBadge");
+  if (state.streak >= STREAK_MIN){
+    badge.textContent = `🔥 連續答對 ${state.streak} 題 · ${state.streak} IN A ROW`;
+    badge.hidden = false;
+  } else {
+    badge.hidden = true;
+  }
+}
+
+/* ---------- Feedback overlay ---------- */
+function showFeedback(isRight, q, gained){
+  const fb = $("feedback");
+  fb.classList.remove("right", "wrong");
+  fb.classList.add(isRight ? "right" : "wrong", "show");
+  $("fbIcon").textContent = isRight ? "✓" : "✗";
+  $("fbTitle").innerHTML = isRight
+    ? '<span class="zh">答對了！</span><span class="en">Correct!</span>'
+    : '<span class="zh">答錯了</span><span class="en">Not quite</span>';
+
+  const detail = $("fbDetail");
+  if (isRight){
+    detail.hidden = true;
+  } else {
+    detail.innerHTML =
+      '<span class="zh">正確答案：' + q.answer + '</span>' +
+      '<span class="en">Correct answer: ' + q.answer + '</span>';
+    detail.hidden = false;
+  }
+
+  const plus = $("fbPlus");
+  if (isRight && gained > 0){
+    const bonus = gained - POINTS;
+    plus.textContent = bonus > 0 ? `+${gained} 分 (連續獎分 +${bonus})` : `+${gained} 分`;
+    plus.hidden = false;
+  } else {
+    plus.hidden = true;
+  }
+}
+
+function hideFeedback(){
+  $("feedback").classList.remove("show");
+}
+
+/* =========================================================
+   Certificate — drawn straight onto a canvas so that what the
+   student sees is exactly what gets shared or downloaded.
+   ========================================================= */
+const CERT_W = 1200, CERT_H = 850, CERT_SCALE = 2;
+
+function roundRect(ctx, x, y, w, h, r){
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y,     x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x,     y + h, r);
+  ctx.arcTo(x,     y + h, x,     y,     r);
+  ctx.arcTo(x,     y,     x + w, y,     r);
+  ctx.closePath();
+}
+
+function star(ctx, cx, cy, spikes, outer, inner){
+  ctx.beginPath();
+  for (let i = 0; i < spikes * 2; i++){
+    const r = i % 2 === 0 ? outer : inner;
+    const a = (Math.PI * i) / spikes - Math.PI / 2;
+    ctx.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
+  }
+  ctx.closePath();
+}
+
+const FONT_STACK = '"PingFang TC","Microsoft JhengHei","Noto Sans TC",system-ui,sans-serif';
+
+function formatDuration(ms){
+  const total = Math.max(0, Math.round(ms / 1000));
+  const m = String(Math.floor(total / 60)).padStart(2, "0");
+  const s = String(total % 60).padStart(2, "0");
+  return `${m}:${s}`;
+}
+
+function hkTime(date, locale){
+  try {
+    return new Intl.DateTimeFormat(locale, {
+      timeZone: "Asia/Hong_Kong",
+      dateStyle: "long",
+      timeStyle: "short"
+    }).format(date);
+  } catch (e) {
+    return date.toString();
+  }
+}
+
+function drawCertificate(){
+  const canvas = $("certCanvas");
+  canvas.width  = CERT_W * CERT_SCALE;
+  canvas.height = CERT_H * CERT_SCALE;
+  const c = canvas.getContext("2d");
+  c.setTransform(CERT_SCALE, 0, 0, CERT_SCALE, 0, 0);
+  c.textAlign = "center";
+
+  // Gradient frame with a white panel inside it.
+  const g = c.createLinearGradient(0, 0, CERT_W, CERT_H);
+  g.addColorStop(0, "#6d28d9");
+  g.addColorStop(1, "#0ea5e9");
+  c.fillStyle = g;
+  c.fillRect(0, 0, CERT_W, CERT_H);
+
+  c.fillStyle = "#ffffff";
+  roundRect(c, 22, 22, CERT_W - 44, CERT_H - 44, 20);
+  c.fill();
+
+  c.strokeStyle = "#f59e0b";
+  c.lineWidth = 3;
+  roundRect(c, 44, 44, CERT_W - 88, CERT_H - 88, 14);
+  c.stroke();
+
+  // Gold seal
+  const cx = CERT_W / 2;
+  c.fillStyle = "#fbbf24";
+  c.beginPath();
+  c.arc(cx, 128, 46, 0, Math.PI * 2);
+  c.fill();
+  c.fillStyle = "#ffffff";
+  star(c, cx, 128, 5, 27, 12);
+  c.fill();
+
+  // Title
+  c.fillStyle = "#4c1d95";
+  c.font = `900 56px ${FONT_STACK}`;
+  c.fillText("學習證書", cx, 232);
+  c.fillStyle = "#6d28d9";
+  c.font = `700 27px ${FONT_STACK}`;
+  c.fillText("Certificate of Achievement", cx, 268);
+
+  c.strokeStyle = "#e9d5ff";
+  c.lineWidth = 3;
+  c.beginPath();
+  c.moveTo(cx - 200, 296);
+  c.lineTo(cx + 200, 296);
+  c.stroke();
+
+  // Recipient
+  c.fillStyle = "#475569";
+  c.font = `700 24px ${FONT_STACK}`;
+  c.fillText("此證書頒發給", cx, 344);
+  c.font = `600 18px ${FONT_STACK}`;
+  c.fillText("This certificate is proudly awarded to", cx, 370);
+
+  // Shrink the name if it is long enough to reach the border.
+  let nameSize = 62;
+  c.fillStyle = "#1e1b4b";
+  do {
+    c.font = `900 ${nameSize}px ${FONT_STACK}`;
+    if (c.measureText(state.name).width <= 900) break;
+    nameSize -= 4;
+  } while (nameSize > 26);
+  c.fillText(state.name, cx, 442);
+
+  c.strokeStyle = "#c4b5fd";
+  c.lineWidth = 4;
+  c.beginPath();
+  c.moveTo(cx - 260, 466);
+  c.lineTo(cx + 260, 466);
+  c.stroke();
+
+  // Stats
+  const stats = [
+    { zh: "分數",     en: "Score",       value: String(state.score) },
+    { zh: "答對題數", en: "Correct",     value: String(state.correct) },
+    { zh: "用時",     en: "Time Used",   value: formatDuration(state.elapsedMs) },
+    { zh: "最長連續", en: "Best Streak", value: String(state.bestStreak) }
+  ];
+  const boxW = 240, gap = 24, boxH = 132;
+  const startX = (CERT_W - (boxW * 4 + gap * 3)) / 2;
+  const boxY = 516;
+
+  stats.forEach((s, i) => {
+    const x = startX + i * (boxW + gap);
+    c.fillStyle = "#f5f3ff";
+    roundRect(c, x, boxY, boxW, boxH, 18);
+    c.fill();
+    c.strokeStyle = "#ddd6fe";
+    c.lineWidth = 2;
+    c.stroke();
+
+    const mid = x + boxW / 2;
+    c.fillStyle = "#6d28d9";
+    c.font = `800 21px ${FONT_STACK}`;
+    c.fillText(s.zh, mid, boxY + 34);
+    c.fillStyle = "#7c3aed";
+    c.font = `600 15px ${FONT_STACK}`;
+    c.fillText(s.en, mid, boxY + 56);
+    c.fillStyle = "#1e1b4b";
+    c.font = `900 44px ${FONT_STACK}`;
+    c.fillText(s.value, mid, boxY + 108);
+  });
+
+  // Footer
+  const now = new Date();
+  c.fillStyle = "#475569";
+  c.font = `700 20px ${FONT_STACK}`;
+  c.fillText("完成時間：" + hkTime(now, "zh-HK"), cx, 704);
+  c.font = `600 17px ${FONT_STACK}`;
+  c.fillStyle = "#64748b";
+  c.fillText("Completed: " + hkTime(now, "en-HK") + " (Hong Kong Time)", cx, 730);
+
+  c.fillStyle = "#94a3b8";
+  c.font = `700 18px ${FONT_STACK}`;
+  c.fillText("兩位數加減遊戲 · Two-Digit Add & Subtract", cx, 786);
+}
+
+/* =========================================================
+   Sharing
+   ========================================================= */
+function certFilename(){
+  const d = new Date();
+  const stamp = d.getFullYear() +
+    String(d.getMonth() + 1).padStart(2, "0") +
+    String(d.getDate()).padStart(2, "0");
+  const safe = state.name.replace(/[\\/:*?"<>|]/g, "").trim() || "student";
+  return `證書_${safe}_${stamp}.png`;
+}
+
+function certBlob(){
+  return new Promise(resolve => $("certCanvas").toBlob(resolve, "image/png"));
+}
+
+function downloadBlob(blob, filename){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+
+function classroomUrl(){
+  const title = `${state.name} 的兩位數加減成績 / Two-Digit Add & Subtract result`;
+  const body  = `分數 Score: ${state.score} · 答對 Correct: ${state.correct} · 用時 Time: ${formatDuration(state.elapsedMs)}`;
+  return "https://classroom.google.com/share" +
+    "?url="   + encodeURIComponent(GAME_URL) +
+    "&title=" + encodeURIComponent(title) +
+    "&body="  + encodeURIComponent(body);
+}
+
+async function shareCertificate(){
+  const blob = await certBlob();
+  if (!blob) return;
+  const file = new File([blob], certFilename(), { type: "image/png" });
+
+  // Phones and tablets: hand the actual image to the OS share sheet, which
+  // lists Google Classroom directly.
+  if (navigator.canShare && navigator.canShare({ files: [file] })){
+    try {
+      await navigator.share({
+        files: [file],
+        title: "學習證書 Certificate of Achievement",
+        text: `${state.name} — 分數 Score ${state.score}`
+      });
+      return;
+    } catch (err) {
+      if (err && err.name === "AbortError") return; // student cancelled
+      // anything else falls through to the desktop path below
+    }
+  }
+
+  // Desktop: Classroom's share endpoint only accepts a URL, so save the image
+  // first and let the student attach it in the window we open.
+  downloadBlob(blob, certFilename());
+  window.open(classroomUrl(), "_blank", "noopener");
+  $("shareHint").hidden = false;
+}
+
+/* =========================================================
+   Wiring
+   ========================================================= */
+const nameInput = $("nameInput");
+const startBtn  = $("startBtn");
+
+nameInput.addEventListener("input", () => {
+  startBtn.disabled = nameInput.value.trim().length === 0;
+});
+nameInput.addEventListener("keydown", e => {
+  if (e.key === "Enter" && !startBtn.disabled) startBtn.click();
+});
+
+startBtn.addEventListener("click", () => {
+  state.name = nameInput.value.trim().slice(0, 20);
+  if (!state.name) return;
+  store("tdas.name", state.name);
+  startGame();
+});
+
+document.getElementById("options").addEventListener("click", e => {
+  const btn = e.target.closest(".opt");
+  if (btn) answer(Number(btn.dataset.i));
+});
+
+document.addEventListener("keydown", e => {
+  if (!$("screen-game").classList.contains("active")) return;
+  if (e.key >= "1" && e.key <= "4") answer(Number(e.key) - 1);
+});
+
+$("againBtn").addEventListener("click", startGame);
+
+$("changeNameBtn").addEventListener("click", () => {
+  nameInput.value = state.name;
+  startBtn.disabled = nameInput.value.trim().length === 0;
+  showScreen("screen-welcome");
+  nameInput.focus();
+  nameInput.select();
+});
+
+$("shareBtn").addEventListener("click", shareCertificate);
+
+$("downloadBtn").addEventListener("click", async () => {
+  const blob = await certBlob();
+  if (blob) downloadBlob(blob, certFilename());
+});
+
+// Pre-fill the name for a student who has played on this device before.
+const saved = store("tdas.name");
+if (saved){
+  nameInput.value = saved;
+  startBtn.disabled = false;
+}
+</script>
+</body>
+</html>
