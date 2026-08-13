@@ -4,8 +4,9 @@
 
 A two-digit addition & subtraction practice game for Hong Kong primary school students. A single, client-only HTML file (HTML + CSS + JavaScript) — no server, no build step, no external libraries. Ready to host on GitHub Pages.
 
-**遊玩網址 · Play here:** `https://charlotte-lau-hk.github.io/two-digits-addition-subtraction/`
-> ⬆️ 啟用 GitHub Pages 後即可使用。 · Available once GitHub Pages is enabled.
+**遊玩網址 · Play here:** [`https://charlotte-lau-hk.github.io/two-digits-addition-subtraction/`](https://charlotte-lau-hk.github.io/two-digits-addition-subtraction/)
+
+第二版本 Version 2： [`https://charlotte-lau-hk.github.io/two-digits-addition-subtraction/gemini-version/`](https://charlotte-lau-hk.github.io/two-digits-addition-subtraction/gemini-version/)
 
 ---
 
