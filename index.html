@@ -463,7 +463,8 @@ input[type=text]:focus{outline:none;border-color:var(--c4);background:#fff}
    CONFIG — edit this after you publish to GitHub Pages.
    It is used for the Google Classroom share link.
    ========================================================= */
-const GAME_URL = "https://charlotte-lau-hk.github.io/two-digits-addition-subtraction/";
+const GAME_URL = "";  // 留空 = 自動使用本頁網址
+const shareUrl = GAME_URL || (location.origin + location.pathname);
 
 const QUESTION_MS   = 8000;  // starting time allowed to answer each question (running out = a wrong answer)
 
