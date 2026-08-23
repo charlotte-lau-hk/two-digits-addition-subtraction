@@ -10,8 +10,6 @@ A two-digit addition & subtraction practice game for Hong Kong primary school st
 
 - **第一版（不完整）Version 1 (incomplete)**：[gemini-rebuild-v1-has_bugs.html](https://charlotte-lau-hk.github.io/two-digits-addition-subtraction/gemini-rebuild-v1-has_bugs.html) — 玩法與介面大致重現，但**遺漏了「等級 1 至 3 結果必須小於 100」這條規則**。 · Playable and visually complete, but it **dropped the "results must stay under 100 at Levels 1–3" rule**.
 - **第二版（附測試按鈕）Version 2 (with test button)**：[gemini-rebuild-v2-with_test_button.html](https://charlotte-lau-hk.github.io/two-digits-addition-subtraction/gemini-rebuild-v2-with_test_button.html) — 在第一版之上加了一個 🧪 測試按鈕，每一級即時生成 2,000 題，逐條對照規則並報回違規率。按下去會顯示：**等級 1 約 53%、等級 2 約 33%、等級 3 約 24% 的題目結果大於或等於 100**（等級 4 容許破百，違規率 0%）。 · Adds a 🧪 test button that generates 2,000 questions per level in real time and reports the violation rate against each rule. It shows **~53% / ~33% / ~24% of Level 1–3 questions produce results ≥ 100** (Level 4 allows it, 0%).
-- **`gemini-rebuild-v1-with_useless_test.html`** —— 中途的一次失敗嘗試：測試按鈕加了，但它只檢查程式碼本身已經保證的事（數字範圍、四個選項不重複），所以永遠報「全部通過」。**保留作對照。** · A failed intermediate attempt: the button exists, but it only checks what the code already guarantees, so it always reports "all passed". Kept for comparison.
-
 > 本目錄的 `index.html`（原始版本）**沒有**這個問題：它的 `makeAddition(carry, allowOver100)` 明確限制總和，破百只在等級 4 按設計出現。 · The original `index.html` in this repository does **not** have this problem — its `makeAddition(carry, allowOver100)` caps the sum, and over-100 appears only at Level 4 by design.
 
 
