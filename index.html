@@ -183,17 +183,24 @@ input[type=text]:focus{outline:none;border-color:var(--c4);background:#fff}
 }
 .level-chip.maxed .level-fill{background:linear-gradient(90deg,#34d399,#10b981)}
 
-/* Per-question countdown timer bar (duration set in JS, shrinks with score) */
+/* Per-question countdown (duration set in JS, shrinks with score).
+   The bar is driven from JavaScript, NOT a CSS animation: a blanket
+   prefers-reduced-motion rule below switches every animation off, and this
+   bar carries information rather than decoration -- it must keep working.
+   The seconds figure beside it is the same information without any motion. */
+.timer-row{display:flex;align-items:center;gap:10px;margin-bottom:clamp(8px,2vw,14px)}
 .timer-track{
-  height:14px;background:#eef2ff;border-radius:999px;
-  overflow:hidden;margin-bottom:clamp(8px,2vw,14px);
+  flex:1;height:14px;background:#eef2ff;border-radius:999px;overflow:hidden;
 }
 .timer-bar{height:100%;width:100%;background:#22c55e;border-radius:999px}
-@keyframes timerShrink{
-  0%{width:100%;background:#22c55e}
-  60%{background:#f59e0b}
-  100%{width:0;background:#dc2626}
+.timer-bar.warn{background:#f59e0b}
+.timer-bar.danger{background:#dc2626}
+.timer-secs{
+  min-width:3.2em;text-align:right;font-variant-numeric:tabular-nums;
+  font-weight:800;font-size:clamp(14px,3.2vw,18px);color:#475569;
 }
+.timer-secs.warn{color:#b45309}
+.timer-secs.danger{color:#b91c1c}
 
 /* ---------- Question ---------- */
 .qmeta{text-align:center;color:var(--muted);font-weight:800;font-size:clamp(12px,3.2vw,15px);letter-spacing:1px}
@@ -391,7 +398,13 @@ input[type=text]:focus{outline:none;border-color:var(--c4);background:#fff}
   <div class="streak-slot"><div class="streak" id="streakBadge"></div></div>
 
   <div class="card">
-    <div class="timer-track"><div class="timer-bar" id="timerBar"></div></div>
+    <div class="timer-row">
+      <div class="timer-track" id="timerTrack" role="progressbar"
+           aria-label="剩餘時間 Time remaining" aria-valuemin="0" aria-valuemax="8" aria-valuenow="8">
+        <div class="timer-bar" id="timerBar"></div>
+      </div>
+      <div class="timer-secs" id="timerSecs">8s</div>
+    </div>
     <div class="qmeta" id="qMeta">第 1 題 · QUESTION 1</div>
     <div class="question" id="questionText">— + — = ?</div>
     <div class="options" id="options">
@@ -671,14 +684,16 @@ const state = {
   locked: false,
   qTimer: null,
   fbTimer: null,
-  fbInterval: null
+  fbInterval: null,
+  qRaf: null
 };
 
 function clearTimers(){
   clearTimeout(state.qTimer);
   clearTimeout(state.fbTimer);
   clearInterval(state.fbInterval);
-  state.qTimer = state.fbTimer = state.fbInterval = null;
+  if (state.qRaf) cancelAnimationFrame(state.qRaf);
+  state.qTimer = state.fbTimer = state.fbInterval = state.qRaf = null;
 }
 
 function showScreen(id){
@@ -727,13 +742,37 @@ function nextQuestion(){
 
 function startQuestionTimer(){
   const ms = questionMs(state.score);
-  state.qMs = ms;                             // keep timeout, animation and fast bonus on the same clock
-  const bar = $("timerBar");
-  bar.style.animation = "none";
-  void bar.offsetWidth;                       // restart the shrink animation
-  bar.style.animation = `timerShrink ${ms}ms linear forwards`;
+  state.qMs = ms;                             // keep timeout, bar and fast bonus on the same clock
   state.qStart = Date.now();
   state.qTimer = setTimeout(() => answer(-1), ms);  // -1 = time ran out
+  paintTimer(ms);                             // draw the full bar before the first frame
+  const tick = () => {
+    const left = Math.max(0, state.qMs - (Date.now() - state.qStart));
+    paintTimer(left);
+    state.qRaf = left > 0 ? requestAnimationFrame(tick) : null;
+  };
+  state.qRaf = requestAnimationFrame(tick);
+}
+
+// Draws the countdown from a plain number of milliseconds left. Deliberately
+// no CSS animation and no transition, so it behaves the same whether or not
+// the reader has "reduce motion" switched on.
+function paintTimer(msLeft){
+  const bar = $("timerBar"), secs = $("timerSecs"), track = $("timerTrack");
+  if (!bar) return;
+  const total = state.qMs || QUESTION_MS;
+  const frac = Math.max(0, Math.min(1, msLeft / total));
+  const level = frac <= 0.25 ? "danger" : frac <= 0.5 ? "warn" : "";
+  bar.style.width = (frac * 100).toFixed(2) + "%";
+  bar.className = "timer-bar" + (level ? " " + level : "");
+  if (secs){
+    secs.textContent = Math.ceil(msLeft / 1000) + "s";
+    secs.className = "timer-secs" + (level ? " " + level : "");
+  }
+  if (track){
+    track.setAttribute("aria-valuemax", String(Math.round(total / 1000)));
+    track.setAttribute("aria-valuenow", String(Math.ceil(msLeft / 1000)));
+  }
 }
 
 // Extra points for a quick correct answer, based on how much time was left.
@@ -749,7 +788,8 @@ function answer(i){
   state.locked = true;
   clearTimeout(state.qTimer);
   state.qTimer = null;
-  $("timerBar").style.animation = "none";
+  if (state.qRaf) { cancelAnimationFrame(state.qRaf); state.qRaf = null; }
+  paintTimer(Math.max(0, state.qMs - (Date.now() - state.qStart)));  // freeze where it stands
 
   const q = state.current;
   const timedOut = i < 0;
