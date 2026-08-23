@@ -6,7 +6,7 @@ A two-digit addition & subtraction practice game for Hong Kong primary school st
 
 **遊玩網址 · Play here:** [`https://charlotte-lau-hk.github.io/two-digits-addition-subtraction/`](https://charlotte-lau-hk.github.io/two-digits-addition-subtraction/)
 
-第二版本 Version 2： [`https://charlotte-lau-hk.github.io/two-digits-addition-subtraction/gemini-version/`](https://charlotte-lau-hk.github.io/two-digits-addition-subtraction/gemini-version/)
+重製版本 Gemini Rebuild Version 1： [`https://charlotte-lau-hk.github.io/two-digits-addition-subtraction/gemini-version/`](https://charlotte-lau-hk.github.io/two-digits-addition-subtraction/gemini-version/)
 
 ---
 
