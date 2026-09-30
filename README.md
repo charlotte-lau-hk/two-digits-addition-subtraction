@@ -6,6 +6,10 @@ A two-digit addition & subtraction practice game for Hong Kong primary school st
 
 **遊玩網址 · Play here:** [`https://charlotte-lau-hk.github.io/two-digits-addition-subtraction/`](https://charlotte-lau-hk.github.io/two-digits-addition-subtraction/)
 
+有兩個模式：**單人**（原本的玩法，完成後有證書）及**對戰**（2–3 隊在同一部觸控大屏幕上比賽）。 · Two modes: **Solo** (the original game, with a certificate at the end) and **Versus** (2–3 teams competing side by side on one big touch screen).
+
+**第一版（只有單人模式）· Version 1 (solo only):** [v1.html](https://charlotte-lau-hk.github.io/two-digits-addition-subtraction/v1.html) — 加入對戰模式前的版本，保留作對照。 · The game as it was before Versus mode was added, kept for reference.
+
 重製測試 Gemini Rebuild：以本遊戲的規格交給 Gemini 重新生成，用來對照「說明寫得再清楚，生成出來的程式是否真的符合」。 · Rebuild experiment: the same specification handed to Gemini, used to check whether a clearly-specified rule actually survives into generated code.
 
 - **第一版（不完整）Version 1 (incomplete)**：[gemini-rebuild-v1-has_bugs.html](https://charlotte-lau-hk.github.io/two-digits-addition-subtraction/gemini-rebuild-v1-has_bugs.html) — 玩法與介面大致重現，但**遺漏了「等級 1 至 3 結果必須小於 100」這條規則**。 · Playable and visually complete, but it **dropped the "results must stay under 100 at Levels 1–3" rule**.
@@ -17,6 +21,10 @@ A two-digit addition & subtraction practice game for Hong Kong primary school st
 
 ## 玩法 · How to play
 
+開始畫面先選模式：**🧑 單人 Solo** 或 **⚔️ 對戰 Versus**。 · The first screen asks for a mode: **🧑 Solo** or **⚔️ Versus**.
+
+### 單人模式 · Solo mode
+
 - 先輸入名字，然後開始遊戲。 · Enter a name, then start.
 - 每題四個選項，選出正確答案。 · Each question has four choices; pick the right answer.
 - 每題有 **8 秒**限時（頂部的進度條會倒數）；時間到會當作答錯。分數超過 **500** 後，限時會逐漸縮短——每多 50 分減 0.5 秒，最快到 **3 秒**（約 1000 分時）。 · Each question has an **8-second** limit (the top bar counts down); running out of time counts as a wrong answer. Once your score passes **500**, the limit gradually shortens — by 0.5s for every 50 points — down to a floor of **3 seconds** (around 1000 points).
@@ -24,6 +32,20 @@ A two-digit addition & subtraction practice game for Hong Kong primary school st
 - 你有 **3 條命**（❤️），答錯 3 次遊戲結束。 · You have **3 lives** (❤️); the game ends after 3 wrong answers.
 - 每題作答後會顯示對／錯 2 秒（有倒數動畫），然後自動下一題。 · Correct/wrong is shown for 2 seconds (with a countdown animation), then the next question loads.
 - 也可以用鍵盤 **1–4** 作答。 · You can also answer with keys **1–4**.
+
+### 對戰模式 · Versus mode
+
+為課室的觸控大屏幕（例如 75" / 86" 4K 智能白板）而設，2 或 3 位學生同時站在屏幕前比賽。 · Built for a classroom touch screen (e.g. a 75" / 86" 4K interactive panel): 2 or 3 students stand at the board and play at the same time.
+
+- **老師設定**：選擇人數（2 或 3）及時間（30s / 60s / 90s / 120s，預設 60s），按「開始對戰」。設定會記住在該裝置。亦可按「⛶ 全螢幕」隱藏瀏覽器工具列。 · **Teacher setup**: pick the number of players (2 or 3) and the time limit (30s / 60s / 90s / 120s, default 60s), then press Start. The settings are remembered on that device. "⛶ Full screen" hides the browser toolbars.
+- **隊伍**：2 人為 🔴 紅隊 對 🔵 藍隊；3 人為 🔴 紅隊、🔵 藍隊、🟡 黃隊（避免紅綠並列，照顧色弱的學生）。不用輸入名字。 · **Teams**: 2 players are 🔴 Red vs 🔵 Blue; 3 players are 🔴 Red, 🔵 Blue, 🟡 Yellow (red and green are avoided side by side for colour-blind students). No names needed.
+- 屏幕平均分成 2 或 3 欄，每欄有該隊顏色的粗邊框和很淡的底色。上半部顯示隊名、分數和題目；**下半部是四個答案按鈕，只有這裏需要觸碰**。 · The screen splits into 2 or 3 columns, each with a thick team-colour border and a very pale background. The top half shows the team, score and question; **the bottom half holds the four answer buttons — the only place to touch**.
+- 3‑2‑1 倒數後同時開始，頂部有全場共用的時鐘。 · A 3‑2‑1 countdown starts everyone together; one shared clock runs along the top.
+- 每隊按自己的速度作答，等級按自己的分數升級（與單人模式相同）。 · Each team plays at its own pace, and levels up by its own score (same rules as solo).
+- 答對：+10 分，另有 🔥 連續及 ⚡ 快手獎分；答錯：0 分、連續答對歸零。結果只在該隊的範圍內以圖示顯示約 1 秒（例如 `✓ +10` `🔥 +5` `⚡ +2`，答錯為 `✗` 並以綠色標示正確答案），然後出下一題。 · Right: +10, plus 🔥 streak and ⚡ fast bonuses. Wrong: 0 points and the streak resets. The result shows for about 1 second inside that team's column only, as icons (e.g. `✓ +10` `🔥 +5` `⚡ +2`; a wrong answer shows `✗` with the correct answer in green), then the next question appears.
+- 沒有生命、沒有每題限時、沒有全屏彈出視窗、沒有證書。 · No lives, no per-question timer, no full-screen pop-up, no certificate.
+- **時間到**：顯示勝出隊伍（同分則為「平手」）及每隊的分數、答對題數和最長連續答對。 · **Time's up**: the winner is shown (or a tie), with each team's score, correct answers and best streak.
+- **多點觸控**：答案在手指按下的一刻即計算，每隻手指各自獨立；遊戲畫面亦關閉了縮放、捲動和長按選單，所以幾位學生同時按也不會互相抵消。需要支援多點觸控的屏幕（一般新款智能白板支援 10 點或以上）。 · **Multi-touch**: an answer counts the instant a finger touches the button, each finger on its own, and pinch-zoom, scrolling and the long-press menu are switched off on the game screen, so simultaneous taps don't cancel each other. Needs a multi-touch screen (most current interactive panels support 10+ points).
 
 ### 分級 · Levels
 難度會隨分數升級，共 4 級。升級時會有提示，HUD 也會顯示目前等級與距離下一級的進度條。
@@ -119,6 +141,15 @@ const SPEEDUP_STEP_MS    = 500;  // 每次縮短的毫秒數 · milliseconds rem
 const SPEEDUP_FLOOR_MS   = 3000; // 限時的下限（最快）· the fastest the timer can get (floor)
 ```
 > 想關閉這個加速效果，把 `SPEEDUP_MIN_SCORE` 設成一個很大的數（例如 `999999`）即可。 · To turn the speed-up off, set `SPEEDUP_MIN_SCORE` to a very large number (e.g. `999999`).
+
+對戰模式另有幾個常數 · Versus mode has a few of its own:
+
+```js
+const VS_DURATIONS   = [30, 60, 90, 120];  // 老師可選的時間（秒）· time limits the teacher can choose (s)
+const VS_DEFAULT_SEC = 60;    // 預設時間 · default time limit
+const VS_FEEDBACK_MS = 1000;  // 每隊顯示對／錯的時間（毫秒）· how long each team's result shows (ms)
+const VS_COUNTDOWN   = 3;     // 開始前的倒數 · countdown before the round
+```
 
 ---
 

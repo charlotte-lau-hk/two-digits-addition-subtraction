@@ -69,7 +69,7 @@ h1{text-align:center;font-size:clamp(28px,7vw,44px);font-weight:900;margin:6px 0
 .rule+.rule{margin-top:12px}
 .rule .ico{font-size:1.5em;line-height:1.1;flex:none}
 
-label.field,.field-label{display:block;font-size:clamp(16px,4vw,22px);font-weight:800;margin-bottom:10px}
+label.field{display:block;font-size:clamp(16px,4vw,22px);font-weight:800;margin-bottom:10px}
 input[type=text]{
   width:100%;
   font:inherit;
@@ -323,190 +323,11 @@ input[type=text]:focus{outline:none;border-color:var(--c4);background:#fff}
 .hint[hidden]{display:none}
 .hint .en{opacity:.85}
 
-/* ---------- Mode selection ---------- */
-.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(12px,3vw,20px)}
-.mode-btn{
-  font:inherit;color:#fff;border:none;border-radius:24px;cursor:pointer;
-  padding:clamp(18px,4vw,28px) 12px;text-align:center;
-  box-shadow:0 7px 0 rgba(0,0,0,.22);
-  transition:transform .08s ease,box-shadow .08s ease;
-}
-.mode-btn:active{transform:translateY(4px);box-shadow:0 3px 0 rgba(0,0,0,.22)}
-.mode-solo{background:linear-gradient(180deg,#22c55e,#15803d)}
-.mode-vs{background:linear-gradient(180deg,#f97316,#c2410c)}
-.mode-ico{display:block;font-size:clamp(40px,11vw,64px);line-height:1.15}
-.mode-name{display:block;font-size:clamp(26px,6.5vw,36px);font-weight:900}
-.mode-desc{display:block;margin-top:8px;font-size:clamp(14px,3.4vw,18px);font-weight:800;opacity:.95}
-@media (max-width:420px){.mode-grid{grid-template-columns:1fr}}
-
-/* ---------- Team colours (versus) ---------- */
-.team-red   {--t:#dc2626;--t-dark:#991b1b;--t-pale:#fef2f2;--t-btn1:#f87171;--t-btn2:#dc2626;--t-btn-ink:#fff}
-.team-blue  {--t:#2563eb;--t-dark:#1e3a8a;--t-pale:#eff6ff;--t-btn1:#60a5fa;--t-btn2:#2563eb;--t-btn-ink:#fff}
-.team-yellow{--t:#eab308;--t-dark:#713f12;--t-pale:#fefce8;--t-btn1:#fde047;--t-btn2:#eab308;--t-btn-ink:#422006}
-
-/* ---------- Versus setup ---------- */
-.setup-row{margin-bottom:clamp(16px,4vw,22px)}
-.seg{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.seg-btn{
-  font:inherit;font-weight:900;font-size:clamp(17px,4.4vw,22px);color:var(--ink);
-  padding:14px 10px;border-radius:18px;border:4px solid #ddd6fe;background:#faf5ff;cursor:pointer;
-}
-.seg-btn[aria-pressed="true"]{border-color:var(--c4);background:#fff;box-shadow:0 0 0 4px rgba(168,85,247,.22)}
-.dots{display:flex;justify-content:center;gap:6px;margin-top:8px}
-.dot{width:20px;height:20px;border-radius:50%;background:var(--t)}
-.field-select{
-  width:100%;font:inherit;font-size:clamp(22px,6vw,30px);font-weight:800;color:var(--ink);
-  text-align:center;text-align-last:center;
-  padding:12px 16px;border:4px solid #ddd6fe;border-radius:18px;background:#faf5ff;cursor:pointer;
-}
-.field-select:focus{outline:none;border-color:var(--c4);background:#fff}
-.setup-links{margin-top:12px}
-.btn-row .btn-back{flex:0 0 auto;width:auto;padding-left:22px;padding-right:22px}
-.btn[hidden]{display:none}
-
-/* ---------- Versus game ----------
-   Fills the whole viewport. touch-action:none stops the browser from turning
-   two students' simultaneous taps into a pinch or scroll gesture; answers are
-   taken on pointerdown so every finger counts on its own. */
-#screen-vs{max-width:none}
-#screen-vs.active{
-  position:fixed;inset:0;z-index:10;
-  display:flex;flex-direction:column;
-  gap:clamp(6px,1.2vmin,18px);
-  padding:clamp(6px,1.2vmin,18px);
-  background:var(--ink);
-  touch-action:none;overscroll-behavior:none;
-  user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;
-}
-.vs-bar{display:flex;align-items:center;gap:clamp(8px,1.6vmin,24px);color:#fff}
-.vs-exit{
-  flex:none;font:inherit;font-weight:900;font-size:clamp(14px,2vmin,26px);line-height:1;
-  color:#fff;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.3);
-  border-radius:12px;padding:.45em .7em;cursor:pointer;
-}
-.vs-clock-track{flex:1;height:clamp(10px,1.6vmin,24px);background:rgba(255,255,255,.15);border-radius:999px;overflow:hidden}
-.vs-clock-bar{height:100%;width:100%;background:#22c55e;border-radius:999px}
-.vs-clock-bar.warn{background:#f59e0b}
-.vs-clock-bar.danger{background:#ef4444}
-.vs-clock{
-  flex:none;min-width:3em;text-align:right;line-height:1;
-  font-weight:900;font-variant-numeric:tabular-nums;font-size:clamp(22px,5vmin,72px);
-}
-.vs-clock.danger{color:#fca5a5}
-
-.vs-panels{
-  flex:1;min-height:0;
-  display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);
-  gap:clamp(10px,2vmin,36px);
-}
-/* Sizes inside a panel use container units (cqw/cqh), so the same layout
-   scales to 2 or 3 columns on any screen. vmin values are the fallback. */
-.vs-panel{
-  position:relative;min-width:0;min-height:0;overflow:hidden;
-  display:grid;grid-template-rows:1fr 1fr;
-  background:var(--t-pale);
-  border:clamp(6px,1.1vmin,16px) solid var(--t);
-  border-radius:clamp(16px,2.6vmin,40px);
-  padding:clamp(8px,1.6vmin,28px);
-  container-type:size;
-}
-.vs-top{display:flex;flex-direction:column;align-items:center;min-height:0;text-align:center}
-.vs-head{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px}
-.vs-team{font-weight:900;color:var(--t-dark);font-size:4vmin;font-size:min(7cqw,4.6cqh);line-height:1.1;text-align:left}
-.vs-team .en{font-size:.5em;letter-spacing:1px}
-.vs-tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
-.vs-tag{
-  font-weight:900;color:var(--t-dark);background:#fff;border:2px solid var(--t);
-  border-radius:999px;padding:.12em .55em;white-space:nowrap;
-  font-size:2.4vmin;font-size:min(4.4cqw,3cqh);
-}
-.vs-tag[hidden]{display:none}
-.vs-score{
-  font-weight:900;font-variant-numeric:tabular-nums;color:var(--t-dark);line-height:1;
-  font-size:10vmin;font-size:min(20cqw,13cqh);margin-top:1cqh;
-}
-.vs-score.bump{animation:vsBump .4s}
-@keyframes vsBump{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1)}}
-/* Result message: icons and numbers only. The slot keeps its height when
-   empty so the question never jumps. */
-.vs-msg{
-  display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.3em;
-  min-height:1.6em;margin:auto 0 0;
-  font-weight:900;font-variant-numeric:tabular-nums;
-  font-size:3.4vmin;font-size:min(6.5cqw,4.4cqh);
-}
-.vs-msg.pop{animation:levelPop .3s cubic-bezier(.22,1,.36,1)}
-.vs-chip{background:#fff;border-radius:999px;padding:.1em .5em;box-shadow:0 2px 8px rgba(0,0,0,.12);white-space:nowrap}
-.vs-chip.good{color:#fff;background:var(--good)}
-.vs-chip.bad{color:#fff;background:var(--bad);padding:.1em .7em}
-.vs-chip.streak{color:#c2410c}
-.vs-chip.fast{color:#a16207}
-.vs-chip.level{color:#fff;background:linear-gradient(90deg,#fbbf24,#f97316)}
-.vs-question{
-  font-weight:900;color:#312e81;white-space:nowrap;letter-spacing:.04em;
-  font-variant-numeric:tabular-nums;line-height:1.15;
-  font-size:6vmin;font-size:min(12cqw,8.5cqh);margin-top:.5cqh;
-}
-.vs-question .ans{color:var(--good)}
-
-.vs-options{
-  display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;
-  gap:1.6vmin;gap:min(3.5cqw,2.4cqh);padding-top:min(3.5cqw,2.4cqh);min-height:0;
-}
-.vs-opt{
-  font:inherit;font-weight:900;font-variant-numeric:tabular-nums;
-  font-size:6vmin;font-size:min(13cqw,8.5cqh);
-  color:var(--t-btn-ink);border:none;border-radius:clamp(12px,2vmin,28px);
-  background:linear-gradient(180deg,var(--t-btn1),var(--t-btn2));
-  box-shadow:0 .9cqh 0 rgba(0,0,0,.2);cursor:pointer;min-height:0;
-  touch-action:none;
-}
-.vs-opt:disabled{cursor:default}
-.vs-opt.good{background:var(--good);color:#fff}
-.vs-opt.bad{background:#94a3b8;color:#fff}
-.vs-opt.dim{opacity:.3}
-
-.vs-overlay{
-  position:absolute;inset:0;z-index:5;
-  display:none;align-items:center;justify-content:center;
-  background:rgba(15,23,42,.55);
-}
-.vs-overlay.show{display:flex}
-.vs-overlay-text{
-  color:#fff;font-weight:900;text-align:center;line-height:1;
-  font-size:clamp(80px,28vmin,360px);text-shadow:0 6px 30px rgba(0,0,0,.45);
-}
-.vs-overlay-text.small{font-size:clamp(48px,14vmin,180px)}
-
-/* ---------- Versus result ---------- */
-#vsWinner{color:var(--t-dark,#4c1d95)}
-.vs-results{
-  display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);
-  gap:clamp(8px,2.5vw,16px);margin:clamp(16px,4vw,26px) 0 4px;
-}
-.vs-result{
-  background:var(--t-pale);border:5px solid var(--t);border-radius:20px;
-  padding:12px 8px 14px;text-align:center;color:var(--t-dark);
-}
-.vs-result.win{box-shadow:0 0 0 5px var(--gold),0 10px 26px rgba(245,158,11,.4)}
-.r-crown{font-size:clamp(28px,7vw,40px);line-height:1.1;min-height:1.1em}
-.r-name{font-weight:900;font-size:clamp(18px,4.6vw,26px)}
-.r-name .en{font-size:.55em;letter-spacing:1px}
-.r-score{font-weight:900;font-variant-numeric:tabular-nums;line-height:1.1;font-size:clamp(36px,10vw,60px)}
-.r-stats{font-weight:800;font-size:clamp(13px,3.3vw,17px);opacity:.85;white-space:nowrap}
-
 .footnote{text-align:center;color:rgba(255,255,255,.85);font-size:13px;font-weight:700;margin-top:16px;line-height:1.5}
 
 @media (max-width:380px){
   .options{gap:9px}
   .opt{min-height:70px}
-}
-
-/* A 4K board running at 100% display scaling reports ~3840px of width, which
-   would leave the card screens tiny. Enlarge them there (the versus game
-   screen already scales to the viewport). */
-@media (min-width:2400px) and (min-height:1350px){
-  .screen:not(#screen-vs){zoom:1.8}
 }
 
 @media (prefers-reduced-motion:reduce){
@@ -516,41 +337,8 @@ input[type=text]:focus{outline:none;border-color:var(--c4);background:#fff}
 </head>
 <body>
 
-<!-- ============ MODE SELECTION ============ -->
-<section id="screen-mode" class="screen active">
-  <div class="card">
-    <div class="logo">🧮</div>
-    <h1>
-      <span class="zh">兩位數加減遊戲</span>
-      <span class="en">Two-Digit Add &amp; Subtract</span>
-    </h1>
-    <p class="subtitle">
-      <span class="zh">請選擇模式</span>
-      <span class="en">Choose a mode</span>
-    </p>
-    <div class="mode-grid">
-      <button id="modeSolo" class="mode-btn mode-solo" type="button">
-        <span class="mode-ico">🧑</span>
-        <span class="mode-name">
-          <span class="zh">單人</span>
-          <span class="en">Solo</span>
-        </span>
-        <span class="mode-desc">❤️ × 3 · 🏆</span>
-      </button>
-      <button id="modeVs" class="mode-btn mode-vs" type="button">
-        <span class="mode-ico">⚔️</span>
-        <span class="mode-name">
-          <span class="zh">對戰</span>
-          <span class="en">Versus</span>
-        </span>
-        <span class="mode-desc">👥 2–3 · ⏱</span>
-      </button>
-    </div>
-  </div>
-</section>
-
 <!-- ============ WELCOME ============ -->
-<section id="screen-welcome" class="screen">
+<section id="screen-welcome" class="screen active">
   <div class="card">
     <div class="logo">🧮</div>
     <h1>
@@ -597,10 +385,6 @@ input[type=text]:focus{outline:none;border-color:var(--c4);background:#fff}
     <button id="startBtn" class="btn btn-primary" disabled>
       <span class="zh">開始遊戲</span>
       <span class="en">Start Game</span>
-    </button>
-    <button class="btn btn-ghost back-to-mode" type="button">
-      <span class="zh">← 返回</span>
-      <span class="en">Back</span>
     </button>
   </div>
 </section>
@@ -670,128 +454,15 @@ input[type=text]:focus{outline:none;border-color:var(--c4);background:#fff}
           <span class="en">Download Certificate Image</span>
         </button>
       </div>
-      <div class="btn-row">
-        <button id="againBtn" class="btn btn-again">
-          <span class="zh">我想再玩一次</span>
-          <span class="en">I want to try again</span>
-        </button>
-        <button class="btn btn-ghost btn-back back-to-mode" type="button">
-          <span class="zh">← 返回</span>
-          <span class="en">Back</span>
-        </button>
-      </div>
+      <button id="againBtn" class="btn btn-again">
+        <span class="zh">我想再玩一次</span>
+        <span class="en">I want to try again</span>
+      </button>
     </div>
 
     <div class="hint" id="shareHint" hidden>
       <span class="zh">證書圖片已下載。請在剛開啟的 Google Classroom 視窗中，按「新增附件 → 檔案」，選擇剛下載的圖片再提交。</span>
       <span class="en">The certificate image has been downloaded. In the Google Classroom window that just opened, choose “Add attachment → File”, pick the downloaded image, then submit.</span>
-    </div>
-  </div>
-</section>
-
-<!-- ============ VERSUS SETUP (teacher) ============ -->
-<section id="screen-vs-setup" class="screen">
-  <div class="card">
-    <div class="logo">⚔️</div>
-    <h1>
-      <span class="zh">對戰模式</span>
-      <span class="en">Versus Mode</span>
-    </h1>
-    <p class="subtitle">
-      <span class="zh">老師設定</span>
-      <span class="en">Teacher setup</span>
-    </p>
-
-    <div class="rules">
-      <div class="rule">
-        <span class="ico">⏱</span>
-        <span>
-          <span class="zh">限時內得分最高的一隊勝出。</span>
-          <span class="en">Highest score when time runs out wins.</span>
-        </span>
-      </div>
-      <div class="rule">
-        <span class="ico">👆</span>
-        <span>
-          <span class="zh">每隊只按自己範圍內的答案。沒有生命限制，答錯不扣分。</span>
-          <span class="en">Each team taps answers in its own area. No lives; a wrong answer scores nothing.</span>
-        </span>
-      </div>
-    </div>
-
-    <div class="setup-row">
-      <p class="field-label">
-        <span class="zh">人數</span>
-        <span class="en">Players</span>
-      </p>
-      <div class="seg" id="vsPlayersSeg">
-        <button class="seg-btn" type="button" data-players="2" aria-pressed="true">
-          2 人 · Players
-          <span class="dots"><span class="dot team-red"></span><span class="dot team-blue"></span></span>
-        </button>
-        <button class="seg-btn" type="button" data-players="3" aria-pressed="false">
-          3 人 · Players
-          <span class="dots"><span class="dot team-red"></span><span class="dot team-blue"></span><span class="dot team-yellow"></span></span>
-        </button>
-      </div>
-    </div>
-
-    <div class="setup-row">
-      <label class="field" for="vsTime">
-        <span class="zh">時間</span>
-        <span class="en">Time limit</span>
-      </label>
-      <select id="vsTime" class="field-select"></select>
-    </div>
-
-    <button id="vsStartBtn" class="btn btn-primary" type="button">
-      <span class="zh">開始對戰</span>
-      <span class="en">Start</span>
-    </button>
-    <div class="btn-row setup-links">
-      <button id="vsFullBtn" class="btn btn-ghost" type="button" hidden>
-        <span class="zh">⛶ 全螢幕</span>
-        <span class="en">Full screen</span>
-      </button>
-      <button class="btn btn-ghost back-to-mode" type="button">
-        <span class="zh">← 返回</span>
-        <span class="en">Back</span>
-      </button>
-    </div>
-  </div>
-</section>
-
-<!-- ============ VERSUS GAME ============ -->
-<section id="screen-vs" class="screen">
-  <div class="vs-bar">
-    <button id="vsExit" class="vs-exit" type="button" aria-label="結束 End">✕</button>
-    <div class="vs-clock-track" id="vsClockTrack" role="progressbar"
-         aria-label="剩餘時間 Time remaining" aria-valuemin="0" aria-valuemax="60" aria-valuenow="60">
-      <div class="vs-clock-bar" id="vsClockBar"></div>
-    </div>
-    <div class="vs-clock" id="vsClock">60s</div>
-  </div>
-  <div class="vs-panels" id="vsPanels"></div>
-  <div class="vs-overlay" id="vsOverlay"><div class="vs-overlay-text" id="vsOverlayText"></div></div>
-</section>
-
-<!-- ============ VERSUS RESULT ============ -->
-<section id="screen-vs-end" class="screen">
-  <div class="card">
-    <div class="logo" id="vsEndIcon">🏆</div>
-    <h1 id="vsWinner"></h1>
-    <div class="vs-results" id="vsResults"></div>
-    <div class="cert-actions">
-      <div class="btn-row">
-        <button id="vsAgainBtn" class="btn btn-again" type="button">
-          <span class="zh">再玩一次</span>
-          <span class="en">Play again</span>
-        </button>
-        <button class="btn btn-ghost btn-back back-to-mode" type="button">
-          <span class="zh">← 返回</span>
-          <span class="en">Back</span>
-        </button>
-      </div>
     </div>
   </div>
 </section>
@@ -862,18 +533,6 @@ const LEVELS = [
   { zh: "減法挑戰", en: "Subtraction",     addProb: 0.40, carryProb: 0.65, borrowProb: 0.70 },
   { zh: "破百挑戰", en: "Over 100",        addProb: 0.55, carryProb: 0.70, borrowProb: 0.70 }
 ];
-
-// Versus mode (2–3 teams sharing one big touch screen).
-const VS_TEAMS = [
-  { cls: "team-red",    zh: "紅隊", en: "RED" },
-  { cls: "team-blue",   zh: "藍隊", en: "BLUE" },
-  { cls: "team-yellow", zh: "黃隊", en: "YELLOW" }
-];
-const VS_DURATIONS   = [30, 60, 90, 120];  // seconds the teacher can choose from
-const VS_DEFAULT_SEC = 60;
-const VS_FEEDBACK_MS = 1000;  // how long a team's result shows before its next question
-const VS_COUNTDOWN   = 3;     // 3-2-1 before the round starts
-const VS_TIMESUP_MS  = 1800;  // "time's up" pause before the results (swallows late taps)
 
 /* ---------- tiny helpers ---------- */
 const $ = id => document.getElementById(id);
@@ -964,16 +623,13 @@ function makeSubtraction(borrow){
   return { a: ta * 10 + ua, b: tb * 10 + ub, op: "-" };
 }
 
-// Built from a score rather than the solo state, so each versus player can
-// get questions at their own level.
-function makeQuestion(score = state.score){
-  const level = levelForScore(score);
-  const cfg = LEVELS[level - 1];
+function makeQuestion(){
+  const cfg = LEVELS[levelForScore(state.score) - 1];
   const wantAdd = Math.random() < cfg.addProb;
   let q;
   if (wantAdd){
     const carry = Math.random() < cfg.carryProb;
-    const over100 = level >= 4 && Math.random() < over100Prob(score);
+    const over100 = state.level >= 4 && Math.random() < over100Prob(state.score);
     q = makeAddition(carry, over100);
   } else {
     q = makeSubtraction(Math.random() < cfg.borrowProb);
@@ -1136,8 +792,8 @@ function paintTimer(msLeft){
 }
 
 // Extra points for a quick correct answer, based on how much time was left.
-function fastBonus(responseMs, totalMs = state.qMs || QUESTION_MS){
-  const frac = responseMs / totalMs;
+function fastBonus(responseMs){
+  const frac = responseMs / (state.qMs || QUESTION_MS);
   if (frac <= FAST_FULL_FRAC) return FAST_BONUS_MAX;
   if (frac <= FAST_MID_FRAC)  return FAST_BONUS_MID;
   return 0;
@@ -1589,243 +1245,6 @@ async function shareCertificate(){
 }
 
 /* =========================================================
-   Versus mode — 2 or 3 teams side by side on one screen.
-   Each team has its own questions, score, level and streak and
-   plays at its own pace; one shared clock ends the round.
-   ========================================================= */
-const vs = {
-  teams: 2,
-  secs: VS_DEFAULT_SEC,
-  players: [],
-  running: false,
-  endAt: 0,
-  endTimer: null,
-  raf: null,
-  timers: []       // countdown / overlay timeouts, cleared on exit
-};
-
-function vsStop(){
-  vs.running = false;
-  vs.timers.forEach(clearTimeout);
-  vs.timers = [];
-  clearTimeout(vs.endTimer);
-  vs.endTimer = null;
-  if (vs.raf) cancelAnimationFrame(vs.raf);
-  vs.raf = null;
-  vs.players.forEach(p => { clearTimeout(p.fbTimer); p.fbTimer = null; });
-  vsHideOverlay();
-}
-
-function vsBuildPanels(){
-  const wrap = $("vsPanels");
-  wrap.innerHTML = "";
-  vs.players = VS_TEAMS.slice(0, vs.teams).map((team, t) => {
-    const el = document.createElement("div");
-    el.className = "vs-panel " + team.cls;
-    el.dataset.team = t;
-    el.innerHTML = `
-      <div class="vs-top">
-        <div class="vs-head">
-          <div class="vs-team"><span class="zh">${team.zh}</span><span class="en">${team.en}</span></div>
-          <div class="vs-tags">
-            <span class="vs-tag vs-streak" hidden></span>
-            <span class="vs-tag vs-level">Lv 1</span>
-          </div>
-        </div>
-        <div class="vs-score">0</div>
-        <div class="vs-msg" aria-live="polite"></div>
-        <div class="vs-question">— + — = ?</div>
-      </div>
-      <div class="vs-options">
-        ${[0, 1, 2, 3].map(i => `<button class="vs-opt" type="button" data-i="${i}" disabled></button>`).join("")}
-      </div>`;
-    wrap.appendChild(el);
-    return {
-      team, el,
-      scoreEl: el.querySelector(".vs-score"),
-      msgEl: el.querySelector(".vs-msg"),
-      qEl: el.querySelector(".vs-question"),
-      levelEl: el.querySelector(".vs-level"),
-      streakEl: el.querySelector(".vs-streak"),
-      buttons: Array.from(el.querySelectorAll(".vs-opt")),
-      score: 0, level: 1, streak: 0, bestStreak: 0, correct: 0,
-      current: null, qStart: 0, qMs: QUESTION_MS, locked: true, fbTimer: null
-    };
-  });
-}
-
-function vsShowOverlay(html, small){
-  const t = $("vsOverlayText");
-  t.innerHTML = html;
-  t.classList.toggle("small", !!small);
-  $("vsOverlay").classList.add("show");
-}
-function vsHideOverlay(){ $("vsOverlay").classList.remove("show"); }
-
-function vsStart(){
-  vsStop();
-  vsBuildPanels();
-  vsPaintClock(vs.secs * 1000);
-  showScreen("screen-vs");
-  // 3-2-1, then GO. The overlay also blocks taps until the round starts.
-  const step = n => {
-    if (n > 0){
-      vsShowOverlay(String(n));
-      vs.timers.push(setTimeout(() => step(n - 1), 1000));
-    } else {
-      vsShowOverlay('<span class="zh">開始！</span><span class="en">GO!</span>', true);
-      vs.timers.push(setTimeout(vsBegin, 700));
-    }
-  };
-  step(VS_COUNTDOWN);
-}
-
-function vsBegin(){
-  vsHideOverlay();
-  vs.running = true;
-  vs.endAt = Date.now() + vs.secs * 1000;
-  vs.endTimer = setTimeout(vsTimeUp, vs.secs * 1000);
-  const tick = () => {
-    const left = Math.max(0, vs.endAt - Date.now());
-    vsPaintClock(left);
-    vs.raf = left > 0 && vs.running ? requestAnimationFrame(tick) : null;
-  };
-  vs.raf = requestAnimationFrame(tick);
-  vs.players.forEach(vsNext);
-}
-
-// Same idea as the solo timer: painted from JavaScript, no CSS animation.
-function vsPaintClock(msLeft){
-  const total = vs.secs * 1000;
-  const frac = Math.max(0, Math.min(1, msLeft / total));
-  const secs = Math.ceil(msLeft / 1000);
-  const level = secs <= 10 ? "danger" : frac <= 0.5 ? "warn" : "";
-  const bar = $("vsClockBar"), clock = $("vsClock"), track = $("vsClockTrack");
-  bar.style.width = (frac * 100).toFixed(2) + "%";
-  bar.className = "vs-clock-bar" + (level ? " " + level : "");
-  clock.textContent = secs + "s";
-  clock.className = "vs-clock" + (level === "danger" ? " danger" : "");
-  track.setAttribute("aria-valuemax", String(vs.secs));
-  track.setAttribute("aria-valuenow", String(secs));
-}
-
-function vsNext(p){
-  if (!vs.running) return;
-  const q = p.current = makeQuestion(p.score);
-  p.qEl.textContent = `${q.a} ${q.op === "+" ? "+" : "−"} ${q.b} = ?`;
-  p.msgEl.innerHTML = "";
-  p.msgEl.classList.remove("pop");
-  p.buttons.forEach((b, i) => {
-    b.textContent = q.options[i];
-    b.disabled = false;
-    b.classList.remove("good", "bad", "dim");
-  });
-  p.qMs = questionMs(p.score);   // only used to size the fast bonus
-  p.qStart = Date.now();
-  p.locked = false;
-}
-
-function vsAnswer(p, i){
-  if (!vs.running || p.locked || !p.current) return;
-  p.locked = true;
-  const q = p.current;
-  const isRight = i === q.correctIndex;
-
-  p.buttons.forEach((b, j) => {
-    b.disabled = true;
-    if (j === q.correctIndex) b.classList.add("good");
-    else if (j === i) b.classList.add("bad");
-    else b.classList.add("dim");
-  });
-  p.qEl.innerHTML = `${q.a} ${q.op === "+" ? "+" : "−"} ${q.b} = <span class="ans">${q.answer}</span>`;
-
-  const chips = [];
-  if (isRight){
-    p.correct++;
-    p.streak++;
-    p.bestStreak = Math.max(p.bestStreak, p.streak);
-    const streakB = streakBonus(p.streak);
-    const fastB = fastBonus(Date.now() - p.qStart, p.qMs);
-    p.score += POINTS + streakB + fastB;
-    chips.push(`<span class="vs-chip good">✓ +${POINTS}</span>`);
-    if (streakB) chips.push(`<span class="vs-chip streak">🔥 +${streakB}</span>`);
-    if (fastB)   chips.push(`<span class="vs-chip fast">⚡ +${fastB}</span>`);
-    const newLevel = levelForScore(p.score);
-    if (newLevel > p.level) chips.push(`<span class="vs-chip level">🎉 Lv ${newLevel}</span>`);
-    p.level = newLevel;
-    vsRenderStats(p, true);
-  } else {
-    p.streak = 0;
-    chips.push(`<span class="vs-chip bad">✗</span>`);
-    vsRenderStats(p, false);
-  }
-  p.msgEl.innerHTML = chips.join("");
-  void p.msgEl.offsetWidth;  // restart the pop
-  p.msgEl.classList.add("pop");
-
-  p.fbTimer = setTimeout(() => vsNext(p), VS_FEEDBACK_MS);
-}
-
-function vsRenderStats(p, bump){
-  p.scoreEl.textContent = p.score;
-  p.levelEl.textContent = "Lv " + p.level;
-  p.streakEl.textContent = "🔥 " + p.streak;
-  p.streakEl.hidden = p.streak < STREAK_MIN;
-  if (!bump) return;
-  p.scoreEl.classList.remove("bump");
-  void p.scoreEl.offsetWidth;
-  p.scoreEl.classList.add("bump");
-}
-
-function vsTimeUp(){
-  if (!vs.running) return;
-  vs.running = false;
-  vsPaintClock(0);
-  vs.players.forEach(p => {
-    clearTimeout(p.fbTimer);
-    p.fbTimer = null;
-    p.locked = true;
-    p.buttons.forEach(b => { b.disabled = true; });
-  });
-  vsShowOverlay('<span class="zh">時間到！</span><span class="en">TIME\'S UP!</span>', true);
-  vs.timers.push(setTimeout(vsShowResult, VS_TIMESUP_MS));
-}
-
-function vsShowResult(){
-  vsStop();
-  const top = Math.max(...vs.players.map(p => p.score));
-  const winners = vs.players.filter(p => p.score === top);
-  const h = $("vsWinner");
-  VS_TEAMS.forEach(t => h.classList.remove(t.cls));
-  if (winners.length === 1){
-    const t = winners[0].team;
-    h.classList.add(t.cls);
-    h.innerHTML = `<span class="zh">${t.zh}勝出！</span><span class="en">${t.en} WINS!</span>`;
-    $("vsEndIcon").textContent = "🏆";
-  } else {
-    h.innerHTML = '<span class="zh">平手！</span><span class="en">IT\'S A TIE!</span>';
-    $("vsEndIcon").textContent = "🤝";
-  }
-  $("vsResults").innerHTML = vs.players.map(p => {
-    const win = p.score === top;
-    return `<div class="vs-result ${p.team.cls}${win ? " win" : ""}">
-      <div class="r-crown">${win ? "🏆" : ""}</div>
-      <div class="r-name"><span class="zh">${p.team.zh}</span><span class="en">${p.team.en}</span></div>
-      <div class="r-score">${p.score}</div>
-      <div class="r-stats">✓ ${p.correct} · 🔥 ${p.bestStreak}</div>
-    </div>`;
-  }).join("");
-  showScreen("screen-vs-end");
-}
-
-function vsSetTeams(n){
-  vs.teams = n;
-  document.querySelectorAll("#vsPlayersSeg .seg-btn").forEach(b => {
-    b.setAttribute("aria-pressed", String(Number(b.dataset.players) === n));
-  });
-}
-
-/* =========================================================
    Wiring
    ========================================================= */
 const nameInput = $("nameInput");
@@ -1872,78 +1291,6 @@ const saved = store("tdas.name");
 if (saved){
   nameInput.value = saved;
   startBtn.disabled = false;
-}
-
-/* ---------- Mode selection + versus wiring ---------- */
-$("modeSolo").addEventListener("click", () => {
-  showScreen("screen-welcome");
-});
-$("modeVs").addEventListener("click", () => showScreen("screen-vs-setup"));
-document.querySelectorAll(".back-to-mode").forEach(b => {
-  b.addEventListener("click", () => { vsStop(); showScreen("screen-mode"); });
-});
-
-const vsTime = $("vsTime");
-VS_DURATIONS.forEach(sec => {
-  const o = document.createElement("option");
-  o.value = sec;
-  o.textContent = sec + "s";
-  vsTime.appendChild(o);
-});
-const savedSecs = Number(store("tdas.vs.secs"));
-vs.secs = VS_DURATIONS.includes(savedSecs) ? savedSecs : VS_DEFAULT_SEC;
-vsTime.value = vs.secs;
-vsTime.addEventListener("change", () => {
-  vs.secs = Number(vsTime.value);
-  store("tdas.vs.secs", String(vs.secs));
-});
-
-vsSetTeams(store("tdas.vs.teams") === "3" ? 3 : 2);
-$("vsPlayersSeg").addEventListener("click", e => {
-  const b = e.target.closest(".seg-btn");
-  if (!b) return;
-  vsSetTeams(Number(b.dataset.players));
-  store("tdas.vs.teams", String(vs.teams));
-});
-
-$("vsStartBtn").addEventListener("click", vsStart);
-$("vsAgainBtn").addEventListener("click", vsStart);
-
-// Answers are taken on pointerdown, not click: each finger is its own pointer,
-// so two or three students tapping at the same moment are all counted.
-$("vsPanels").addEventListener("pointerdown", e => {
-  if (e.pointerType === "mouse" && e.button !== 0) return;
-  const btn = e.target.closest(".vs-opt");
-  if (!btn) return;
-  e.preventDefault();
-  if (btn.disabled) return;
-  const p = vs.players[Number(btn.closest(".vs-panel").dataset.team)];
-  if (p) vsAnswer(p, Number(btn.dataset.i));
-});
-// No long-press menu or Safari pinch on the game screen.
-$("screen-vs").addEventListener("contextmenu", e => e.preventDefault());
-document.addEventListener("gesturestart", e => {
-  if ($("screen-vs").classList.contains("active")) e.preventDefault();
-});
-
-$("vsExit").addEventListener("click", () => {
-  if (!confirm("結束這一局？\nEnd this round?")) return;
-  vsStop();
-  showScreen("screen-vs-setup");
-});
-
-// Full screen gives the columns the whole board (hidden where unsupported).
-const fullBtn = $("vsFullBtn");
-if (document.documentElement.requestFullscreen){
-  fullBtn.hidden = false;
-  fullBtn.addEventListener("click", () => {
-    if (document.fullscreenElement) document.exitFullscreen();
-    else document.documentElement.requestFullscreen().catch(() => {});
-  });
-  document.addEventListener("fullscreenchange", () => {
-    fullBtn.querySelector(".zh").textContent = document.fullscreenElement ? "⛶ 離開全螢幕" : "⛶ 全螢幕";
-    fullBtn.querySelector(".en").textContent = document.fullscreenElement ? "Exit full screen" : "Full screen";
-  });
 }
 </script>
 </body>
