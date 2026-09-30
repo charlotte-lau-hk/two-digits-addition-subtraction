@@ -47,11 +47,25 @@ body{
 @keyframes pop{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
 
 .card{
+  position:relative;
   background:#fff;
   border-radius:var(--radius);
   padding:clamp(20px,4.5vw,38px);
   box-shadow:0 18px 50px rgba(15,23,42,.35);
 }
+
+/* Small pill buttons in a card's top corners (back / full screen): they take
+   no height, so the main button stays on screen on short laptop displays. */
+.card-corner{
+  position:absolute;top:clamp(10px,2.4vw,16px);z-index:1;
+  font:inherit;font-weight:900;font-size:clamp(13px,3.2vw,16px);line-height:1.1;
+  color:#4c1d95;background:#fff;border:3px solid #ddd6fe;border-radius:999px;
+  padding:6px 12px;cursor:pointer;white-space:nowrap;
+}
+.card-corner.left{left:clamp(10px,2.4vw,16px)}
+.card-corner.right{right:clamp(10px,2.4vw,16px)}
+.card-corner:active{background:#f5f3ff}
+.card-corner[hidden]{display:none}
 
 /* ---------- Welcome ---------- */
 .logo{font-size:clamp(48px,14vw,76px);text-align:center;line-height:1}
@@ -346,6 +360,10 @@ input[type=text]:focus{outline:none;border-color:var(--c4);background:#fff}
 
 /* ---------- Versus setup ---------- */
 .setup-row{margin-bottom:clamp(16px,4vw,22px)}
+@media (min-width:600px){
+  .setup-grid{display:grid;grid-template-columns:3fr 2fr;gap:18px;align-items:end}
+  .setup-grid .field-select{padding-top:18px;padding-bottom:18px}
+}
 .seg{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .seg-btn{
   font:inherit;font-weight:900;font-size:clamp(17px,4.4vw,22px);color:var(--ink);
@@ -360,7 +378,6 @@ input[type=text]:focus{outline:none;border-color:var(--c4);background:#fff}
   padding:12px 16px;border:4px solid #ddd6fe;border-radius:18px;background:#faf5ff;cursor:pointer;
 }
 .field-select:focus{outline:none;border-color:var(--c4);background:#fff}
-.setup-links{margin-top:12px}
 .btn-row .btn-back{flex:0 0 auto;width:auto;padding-left:22px;padding-right:22px}
 .btn[hidden]{display:none}
 
@@ -502,6 +519,20 @@ input[type=text]:focus{outline:none;border-color:var(--c4);background:#fff}
   .opt{min-height:70px}
 }
 
+/* Short windows (laptops, a board's browser with toolbars): tighten the
+   vertical spacing so the whole card fits without scrolling. */
+@media (max-height:920px){
+  body{padding:10px 16px}
+  .card{padding:clamp(16px,3.4vw,26px) clamp(18px,4vw,34px)}
+  .logo{font-size:clamp(40px,11vw,52px)}
+  h1{margin:2px 0}
+  .subtitle{margin-bottom:12px}
+  .rules{padding:10px 14px;margin-bottom:14px}
+  .rule+.rule{margin-top:6px}
+  .setup-row{margin-bottom:12px}
+  input[type=text]{padding:10px 14px}
+}
+
 /* A 4K board running at 100% display scaling reports ~3840px of width, which
    would leave the card screens tiny. Enlarge them there (the versus game
    screen already scales to the viewport). */
@@ -552,6 +583,7 @@ input[type=text]:focus{outline:none;border-color:var(--c4);background:#fff}
 <!-- ============ WELCOME ============ -->
 <section id="screen-welcome" class="screen">
   <div class="card">
+    <button class="card-corner left back-to-mode" type="button">← 返回 · Back</button>
     <div class="logo">🧮</div>
     <h1>
       <span class="zh">兩位數加減遊戲</span>
@@ -597,10 +629,6 @@ input[type=text]:focus{outline:none;border-color:var(--c4);background:#fff}
     <button id="startBtn" class="btn btn-primary" disabled>
       <span class="zh">開始遊戲</span>
       <span class="en">Start Game</span>
-    </button>
-    <button class="btn btn-ghost back-to-mode" type="button">
-      <span class="zh">← 返回</span>
-      <span class="en">Back</span>
     </button>
   </div>
 </section>
@@ -692,6 +720,8 @@ input[type=text]:focus{outline:none;border-color:var(--c4);background:#fff}
 <!-- ============ VERSUS SETUP (teacher) ============ -->
 <section id="screen-vs-setup" class="screen">
   <div class="card">
+    <button class="card-corner left back-to-mode" type="button">← 返回 · Back</button>
+    <button id="vsFullBtn" class="card-corner right" type="button" hidden>⛶ 全螢幕</button>
     <div class="logo">⚔️</div>
     <h1>
       <span class="zh">對戰模式</span>
@@ -719,6 +749,7 @@ input[type=text]:focus{outline:none;border-color:var(--c4);background:#fff}
       </div>
     </div>
 
+    <div class="setup-grid">
     <div class="setup-row">
       <p class="field-label">
         <span class="zh">人數</span>
@@ -743,21 +774,12 @@ input[type=text]:focus{outline:none;border-color:var(--c4);background:#fff}
       </label>
       <select id="vsTime" class="field-select"></select>
     </div>
+    </div>
 
     <button id="vsStartBtn" class="btn btn-primary" type="button">
       <span class="zh">開始對戰</span>
       <span class="en">Start</span>
     </button>
-    <div class="btn-row setup-links">
-      <button id="vsFullBtn" class="btn btn-ghost" type="button" hidden>
-        <span class="zh">⛶ 全螢幕</span>
-        <span class="en">Full screen</span>
-      </button>
-      <button class="btn btn-ghost back-to-mode" type="button">
-        <span class="zh">← 返回</span>
-        <span class="en">Back</span>
-      </button>
-    </div>
   </div>
 </section>
 
@@ -1941,8 +1963,7 @@ if (document.documentElement.requestFullscreen){
     else document.documentElement.requestFullscreen().catch(() => {});
   });
   document.addEventListener("fullscreenchange", () => {
-    fullBtn.querySelector(".zh").textContent = document.fullscreenElement ? "⛶ 離開全螢幕" : "⛶ 全螢幕";
-    fullBtn.querySelector(".en").textContent = document.fullscreenElement ? "Exit full screen" : "Full screen";
+    fullBtn.textContent = document.fullscreenElement ? "⛶ 離開全螢幕" : "⛶ 全螢幕";
   });
 }
 </script>
